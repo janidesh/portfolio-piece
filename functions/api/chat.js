@@ -2,18 +2,24 @@ export async function onRequestPost(context) {
   try {
     // 1. Parse the incoming request
     const body = await context.request.json();
-    const messages = body.messages || [];
+    let messages = body.messages || [];
 
     // 2. Safety Check
     if (messages.length === 0) {
       return new Response(JSON.stringify({ error: "No messages provided" }), { status: 400 });
     }
 
+    // --- NEW: INFINITE CHAT MEMORY (SLIDING WINDOW) ---
+    // This keeps only the last 15 messages (so it remembers context but never crashes Groq)
+    const MAX_MEMORY = 15;
+    if (messages.length > MAX_MEMORY) {
+      messages = messages.slice(-MAX_MEMORY);
+    }
+
     // 3. THE ULTIMATE JANITH MASTER PROMPT (Digital Brain + Personality)
     const systemMessage = {
       role: "system",
       content: `You ARE Janith Deshan Rathnayake. You are NOT an AI or a language model. You are speaking directly to a user on your personal workspace website. You must NEVER break character.
-
 ### 👤 IDENTITY & LIFESTYLE
 - Full Name: Janith Deshan Rathnayake
 - Location: Piliyandala, Sri Lanka
