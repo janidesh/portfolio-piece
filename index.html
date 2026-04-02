@@ -63,63 +63,68 @@
 </div>
 
 <script>
-  // Array to store the conversation history
   let conversationHistory = [];
 
-  // Allow pressing "Enter" to send
-  function handleEnter(event) {
-    if (event.key === 'Enter') sendMessage();
-  }
-// Inside your <script> in index.html
-async function sendMessage() {
-    const inputField = document.getElementById('chat-input');
-    const userText = inputField.value.trim();
-    if (!userText) return;
-
-    // ADD THIS LINE: Make sure the message is in the array first!
-    conversationHistory.push({ role: "user", content: userText });
-    
-    // ... then do your fetch to /api/chat ...
-}
- 
-    if (!userText) return;
-
-    // 1. Display User Message
-    historyBox.innerHTML += `<p style="text-align: right;"><strong>You:</strong> ${userText}</p>`;
-    
-    // 2. Add to history array
-    conversationHistory.push({ role: "user", content: userText });
-    
-    // 3. Clear input and show loading indicator
-    inputField.value = '';
-    const loadingId = 'loading-' + Date.now();
-    historyBox.innerHTML += `<p id="${loadingId}" style="color: #666;"><em>Janith GPT is thinking...</em></p>`;
-    historyBox.scrollTop = historyBox.scrollHeight; // Scroll to bottom
-
-    try {
-      // 4. Send history to our Cloudflare Function
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationHistory })
-      });
-
-      const data = await response.json();
-      const aiText = data.choices[0].message.content;
-
-      // 5. Remove loading, display AI response, and save to history
-      document.getElementById(loadingId).remove();
+  async function sendMessage() {
+      console.log("1. Send button clicked"); // Check your console for this!
       
-      // Convert basic markdown/newlines to HTML
-      const formattedText = aiText.replace(/\n/g, '<br>');
-      historyBox.innerHTML += `<p><strong>Janith GPT:</strong> ${formattedText}</p>`;
-      conversationHistory.push({ role: "assistant", content: aiText });
+      const inputField = document.getElementById('chat-input');
+      const historyBox = document.getElementById('chat-history');
+      const userText = inputField.value.trim();
 
-    } catch (error) {
-      document.getElementById(loadingId).innerHTML = `<span style="color:red">Sorry, I encountered an error.</span>`;
-    }
-    
-    historyBox.scrollTop = historyBox.scrollHeight; // Scroll to bottom
+      if (!userText) {
+          console.log("2. Input was empty, stopping.");
+          return;
+      }
+
+      // Display User Message immediately
+      historyBox.innerHTML += `<p style="text-align: right;"><strong>You:</strong> ${userText}</p>`;
+      
+      // Update history array
+      conversationHistory.push({ role: "user", content: userText });
+      
+      // Clear input
+      inputField.value = '';
+      
+      // Show loading
+      const loadingId = 'loading-' + Date.now();
+      historyBox.innerHTML += `<p id="${loadingId}" style="color: #666;"><em>Janith GPT is thinking...</em></p>`;
+      historyBox.scrollTop = historyBox.scrollHeight;
+
+      console.log("3. Sending request to /api/chat...");
+
+      try {
+          const response = await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ messages: conversationHistory })
+          });
+
+          console.log("4. Received response from server");
+
+          const data = await response.json();
+          
+          if (data.error) {
+              throw new Error(data.error);
+          }
+
+          const aiText = data.choices[0].message.content;
+          document.getElementById(loadingId).remove();
+          
+          historyBox.innerHTML += `<p><strong>Janith GPT:</strong> ${aiText.replace(/\n/g, '<br>')}</p>`;
+          conversationHistory.push({ role: "assistant", content: aiText });
+
+      } catch (error) {
+          console.error("ERROR:", error);
+          const loader = document.getElementById(loadingId);
+          if (loader) loader.innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
+      }
+      
+      historyBox.scrollTop = historyBox.scrollHeight;
+  }
+
+  function handleEnter(event) {
+      if (event.key === 'Enter') sendMessage();
   }
 </script>
                     <h2 class="section-title">Premium Assets</h2>
