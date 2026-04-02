@@ -7,23 +7,22 @@
     <title>Janith Rathnayake | Workspace</title>
     <link rel="icon" href="other images/logo.png" type="image/png">
     <link rel="stylesheet" href="style.css">
+    
+    <link rel="preload" as="video" href="cinematic animations/background.mp4" type="video/mp4">
 </head>
 <body>
+    <video autoplay loop muted playsinline class="space-bg" id="mainBgVideo">
+        <source src="cinematic animations/background.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+
     <div class="splash-screen" id="loader">
-        <video autoplay loop muted playsinline class="splash-video" id="splashVideo">
-            <source src="cinematic animations/splash.mp4" type="video/mp4">
-        </video>
         <div class="splash-overlay"></div>
         <div class="splash-content">
             <h1 class="neon-text">Janith Rathnayake</h1>
             <p class="neon-sub">INITIALIZING WORKSPACE</p>
         </div>
     </div>
-
-    <video autoplay loop muted playsinline class="space-bg">
-        <source src="cinematic animations/background.mp4" type="video/mp4">
-    </video>
-    <div class="video-overlay"></div>
 
     <nav class="glass-nav">
         <div class="nav-links">
@@ -47,18 +46,18 @@
             <div class="section-header">
                 <div class="header-text">
 
-<div id="janith-gpt-container" style="border: 1px solid #ddd; padding: 20px; border-radius: 12px; margin-bottom: 30px; background: #f9f9f9;">
-  <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
-    🤖 Janith GPT
-  </h3>
+<div id="janith-gpt-container" class="janith-gpt-3d-glass">
+  <div class="chat-header">
+    <h3>🤖 Janith GPT</h3>
+  </div>
   
-  <div id="chat-history" style="height: 250px; overflow-y: auto; border: 1px solid #ccc; background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-family: sans-serif;">
+  <div id="chat-history" class="glass-chat-history">
     <p><strong>Janith GPT:</strong> Hello! I'm Janith GPT. How can I help you today?</p>
   </div>
   
-  <div style="display: flex; gap: 10px;">
-    <input type="text" id="chat-input" placeholder="Ask Janith GPT something..." style="flex-grow: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc;" onkeypress="handleEnter(event)">
-    <button onclick="sendMessage()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">Send</button>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" class="glass-chat-input" placeholder="Ask Janith GPT something..." onkeypress="handleEnter(event)">
+    <button onclick="sendMessage()" class="glass-btn action-btn hover-3d-btn chat-send-btn">Send</button>
   </div>
 </div>
 
@@ -66,7 +65,7 @@
   let conversationHistory = [];
 
   async function sendMessage() {
-      console.log("1. Send button clicked"); // Check your console for this!
+      console.log("1. Send button clicked"); 
       
       const inputField = document.getElementById('chat-input');
       const historyBox = document.getElementById('chat-history');
@@ -77,21 +76,13 @@
           return;
       }
 
-      // Display User Message immediately
       historyBox.innerHTML += `<p style="text-align: right;"><strong>You:</strong> ${userText}</p>`;
-      
-      // Update history array
       conversationHistory.push({ role: "user", content: userText });
-      
-      // Clear input
       inputField.value = '';
       
-      // Show loading
       const loadingId = 'loading-' + Date.now();
       historyBox.innerHTML += `<p id="${loadingId}" style="color: #666;"><em>Janith GPT is thinking...</em></p>`;
       historyBox.scrollTop = historyBox.scrollHeight;
-
-      console.log("3. Sending request to /api/chat...");
 
       try {
           const response = await fetch('/api/chat', {
@@ -100,13 +91,8 @@
               body: JSON.stringify({ messages: conversationHistory })
           });
 
-          console.log("4. Received response from server");
-
           const data = await response.json();
-          
-          if (data.error) {
-              throw new Error(data.error);
-          }
+          if (data.error) throw new Error(data.error);
 
           const aiText = data.choices[0].message.content;
           document.getElementById(loadingId).remove();
@@ -119,7 +105,6 @@
           const loader = document.getElementById(loadingId);
           if (loader) loader.innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
       }
-      
       historyBox.scrollTop = historyBox.scrollHeight;
   }
 
@@ -127,6 +112,7 @@
       if (event.key === 'Enter') sendMessage();
   }
 </script>
+
                     <h2 class="section-title">Premium Assets</h2>
                     <p class="section-desc">High-tier, production-ready tools, templates, and full source codes built for creators.</p>
                 </div>
@@ -177,30 +163,61 @@
                 </div>
             </div>
             <div class="grid-layout tools-grid">
+                
                 <div class="glass-panel tool-card hover-3d">
                     <div class="tool-header">
                         <h3>PNG to JPG</h3>
                         <span class="badge">Local</span>
                     </div>
                     <div class="tool-content">
-                        <input type="file" id="imageInput" accept="image/png" class="file-input">
-                        <label for="imageInput" class="glass-btn outline-btn hover-3d-btn">Select File</label>
-                        <p id="fileName" class="file-name">No file selected</p>
-                        <button id="convertBtn" class="glass-btn action-btn hover-3d-btn" style="display:none;">Convert</button>
-                        <a id="downloadLink" class="glass-btn success-btn hover-3d-btn" style="display:none;" download="converted.jpg" onclick="showDownloadAnimation()">Download JPG</a>
+                        <input type="file" id="imageInput" accept="image/png" class="file-input" style="display:none;">
+                        <label for="imageInput" class="glass-btn outline-btn hover-3d-btn" style="text-align: center; width: 100%;">Select File</label>
+                        <p id="fileName" class="file-name" style="font-size: 0.75rem; color: var(--text-muted); margin: 8px 0; text-align: center;">No file selected</p>
+                        <button id="convertBtn" class="glass-btn action-btn hover-3d-btn" style="display:none; width: 100%;">Convert</button>
+                        <a id="downloadLink" class="glass-btn success-btn hover-3d-btn" style="display:none; width: 100%; text-align: center;" download="converted.jpg" onclick="showDownloadAnimation()">Download JPG</a>
                         <canvas id="imageCanvas" style="display:none;"></canvas>
                     </div>
                 </div>
+
+                <div class="glass-panel tool-card hover-3d">
+                    <div class="tool-header">
+                        <h3>Video Compressor</h3>
+                        <span class="badge" style="background: var(--primary); color: white;">WebWASM</span>
+                    </div>
+                    <div class="tool-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                        <input type="file" id="vidCompressInput" accept="video/mp4,video/webm,video/mov" style="display:none;">
+                        <label for="vidCompressInput" class="glass-btn outline-btn hover-3d-btn" style="text-align: center; width: 100%;">Select Video</label>
+                        <p id="vidCompressName" style="font-size: 0.75rem; color: var(--text-muted); margin: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">No video selected</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+                            <span style="color: var(--text-muted);">Target Size:</span>
+                            <input type="range" id="vidQuality" min="10" max="90" value="10" style="width: 60%; accent-color: var(--primary);">
+                        </div>
+                        <button id="startCompressBtn" class="glass-btn action-btn hover-3d-btn" style="display:none; width: 100%;">Compress Video</button>
+                        <div id="vidCompressStats" style="display:none; flex-direction: column; gap: 8px;">
+                            <div style="width: 100%; background: rgba(0,0,0,0.5); border-radius: 6px; overflow: hidden; height: 6px; border: 1px solid var(--glass-border);">
+                                <div id="vidProgressBar" style="width: 0%; height: 100%; background: #00ffcc; box-shadow: 0 0 10px #00ffcc; transition: width 0.2s linear;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold;">
+                                <span id="vidOldSize" style="color: #ff4d4d;">0 MB</span> 
+                                <span style="color: var(--text-muted);">&#10142;</span> 
+                                <span id="vidNewSize" style="color: #00ffcc;">0 MB</span>
+                            </div>
+                            <a id="vidDownloadBtn" class="glass-btn success-btn hover-3d-btn" style="display:none; text-align: center; margin-top: 5px;" href="#" download="compressed_video.mp4" onclick="showDownloadAnimation()">Download Result</a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="glass-panel tool-card compiler-card hover-3d">
                     <div class="tool-header">
                         <h3>Live Sandbox</h3>
                         <button id="runCodeBtn" class="glass-btn outline-btn run-btn hover-3d-btn">Run</button>
                     </div>
                     <div class="compiler-split">
-                        <textarea id="htmlCode" placeholder="Write HTML/JS here..."></textarea>
-                        <iframe id="codeOutput" title="Output"></iframe>
+                        <textarea id="htmlCode" placeholder="Write HTML/JS here..." style="width: 100%; min-height: 100px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px;"></textarea>
+                        <iframe id="codeOutput" title="Output" style="width: 100%; min-height: 100px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: white; margin-top: 10px;"></iframe>
                     </div>
                 </div>
+                
             </div>
         </section>
 
@@ -211,14 +228,14 @@
                     <p class="section-desc">Interactive test protocols. Take a break and beat the high score.</p>
                 </div>
             </div>
-            <div class="glass-panel game-container hover-3d">
-                <div class="arcade-nav">
+            <div class="glass-panel game-container hover-3d" style="text-align: center; padding: 20px;">
+                <div class="arcade-nav" style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
                     <button class="glass-btn outline-btn hover-3d-btn" onclick="prevGame()">&#8592; Prev</button>
                     <h3 id="current-game-title" style="color: #b026ff; margin: 0 15px;">Protocol: Snake</h3>
                     <button class="glass-btn outline-btn hover-3d-btn" onclick="nextGame()">Next &#8594;</button>
                 </div>
-                <canvas id="arcadeCanvas" width="300" height="300"></canvas>
-                <p id="game-instructions" class="game-hint">Arrow keys to navigate</p>
+                <canvas id="arcadeCanvas" width="300" height="300" style="background:#050505; border-radius:8px; border: 1px solid var(--glass-border);"></canvas>
+                <p id="game-instructions" class="game-hint" style="color: var(--text-muted); font-size: 0.8rem; margin-top: 10px;">Arrow keys to navigate</p>
             </div>
         </section>
 

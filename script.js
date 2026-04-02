@@ -1,13 +1,26 @@
 // --- 1. Compact Splash Logic ---
 document.addEventListener('DOMContentLoaded', () => {
     const loader = document.getElementById('loader');
-    const splashVid = document.getElementById('splashVideo');
-    if (splashVid) splashVid.play().catch(() => console.log("Autoplay blocked."));
-    if (loader) {
-        setTimeout(() => {
-            loader.style.opacity = '0'; 
-            setTimeout(() => { loader.style.display = 'none'; }, 800); 
-        }, 2500); 
+    const bgVid = document.getElementById('mainBgVideo');
+
+    const hideSplash = () => {
+        if (loader) {
+            setTimeout(() => {
+                loader.style.opacity = '0'; 
+                setTimeout(() => { loader.style.display = 'none'; }, 800); 
+            }, 1500); 
+        }
+    };
+
+    if (bgVid) {
+        if (bgVid.readyState >= 3) {
+            hideSplash();
+        } else {
+            bgVid.addEventListener('canplaythrough', hideSplash, { once: true });
+        }
+        bgVid.play().catch(() => console.log("Autoplay blocked."));
+    } else {
+        hideSplash(); 
     }
 });
 
@@ -26,14 +39,12 @@ function showDownloadAnimation() {
 // ==========================================
 // 🚀 HYBRID DATA SYSTEM 🚀
 // ==========================================
-// Note: Put your Drive/Mega/MediaFire links directly into the "file" property
-
 const myDigitalProducts = [
     { id: "p1", name: "Premium Asset 1", folder: "product 1", icon: "icon.png", thumb: "screenshot.png", demo: "demo videos/manager_demo.mp4", screenshots: ["screenshot.png"], size: "150MB", file: "https://drive.google.com/file/d/YOUR_LINK/view" },
     { id: "p2", name: "Premium Asset 2", folder: "product 2", icon: "icon.png", thumb: "screenshot.png", demo: "demo videos/assets_demo.mp4", screenshots: ["screenshot.png"], size: "1.2GB", file: "https://mega.nz/file/YOUR_LINK" },
     { id: "p3", name: "Premium Asset 3", folder: "product 3", icon: "icon.png", thumb: "screenshot.png", demo: "demo videos/demo.mp4", screenshots: [], size: "45MB", file: "https://www.mediafire.com/file/YOUR_LINK" },
     { id: "p4", name: "Premium Asset 4", folder: "product 4", icon: "icon.png", thumb: "screenshot.png", demo: "demo videos/demo.mp4", screenshots: [], size: "80MB", file: "https://drive.google.com/file/d/YOUR_LINK/view" },
-    { id: "p5", name: "Premium Asset 5", folder: "product 5", icon: "icon.png", thumb: "screenshot.png", demo: "demo videos/demo.mp4", screenshots: [], size: "200MB", file: "https://mega.nz/file/YOUR_LINK" } // 5th item triggers View All
+    { id: "p5", name: "Premium Asset 5", folder: "product 5", icon: "icon.png", thumb: "screenshot.png", demo: "demo videos/demo.mp4", screenshots: [], size: "200MB", file: "https://mega.nz/file/YOUR_LINK" } 
 ];
 
 const myBetaProducts = [
@@ -41,7 +52,7 @@ const myBetaProducts = [
     { id: "b2", name: "Beta Tool 2", folder: "beta/b2", icon: "icon.png", thumb: "thumb.jpg", demo: "demo.mp4", screenshots: [], size: "5MB", file: "https://mega.nz/file/YOUR_LINK" },
     { id: "b3", name: "Beta Tool 3", folder: "beta/b3", icon: "icon.png", thumb: "thumb.jpg", demo: "demo.mp4", screenshots: [], size: "18MB", file: "https://www.mediafire.com/file/YOUR_LINK" },
     { id: "b4", name: "Beta Tool 4", folder: "beta/b4", icon: "icon.png", thumb: "thumb.jpg", demo: "demo.mp4", screenshots: [], size: "2MB", file: "https://drive.google.com/file/d/YOUR_LINK" },
-    { id: "b5", name: "Beta Tool 5", folder: "beta/b5", icon: "icon.png", thumb: "thumb.jpg", demo: "demo.mp4", screenshots: [], size: "9MB", file: "https://mega.nz/file/YOUR_LINK" } // 5th item triggers View All
+    { id: "b5", name: "Beta Tool 5", folder: "beta/b5", icon: "icon.png", thumb: "thumb.jpg", demo: "demo.mp4", screenshots: [], size: "9MB", file: "https://mega.nz/file/YOUR_LINK" } 
 ];
 
 const posts = { 
@@ -72,7 +83,6 @@ function renderProducts(array, containerId, limit = null) {
         const card = document.createElement('div');
         card.className = 'glass-panel product-card hover-3d';
         
-        // Smart External Link Logic
         const isExternal = prod.file.startsWith('http');
         const fileHref = isExternal ? prod.file : `${prod.folder}/${prod.file}`;
         const fileAttrs = isExternal ? 'target="_blank" rel="noopener noreferrer"' : 'download';
@@ -104,7 +114,6 @@ function initGrids() {
     renderProducts(myDigitalProducts, 'main-products-grid', INITIAL_LIMIT);
     renderProducts(myBetaProducts, 'beta-grid', INITIAL_LIMIT);
 
-    // Premium Assets Button
     const prodBtn = document.getElementById('viewAllProductsBtn');
     if (myDigitalProducts.length > INITIAL_LIMIT) {
         prodBtn.style.display = 'inline-block';
@@ -115,7 +124,6 @@ function initGrids() {
         };
     }
 
-    // Beta Vault Button
     const betaBtn = document.getElementById('viewAllBetaBtn');
     if (myBetaProducts.length > INITIAL_LIMIT) {
         betaBtn.style.display = 'inline-block';
@@ -127,235 +135,345 @@ function initGrids() {
     }
 }
 
-initGrids(); // Initialize grids on load
+initGrids(); 
 
-// Search Logic (hides button when searching)
+// Search Logic
 const betaSearch = document.getElementById('betaSearch');
 if(betaSearch) {
     betaSearch.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const betaBtn = document.getElementById('viewAllBetaBtn');
-        
         if (term === '') {
             renderProducts(myBetaProducts, 'beta-grid', betaExpanded ? 20 : INITIAL_LIMIT);
             if (myBetaProducts.length > INITIAL_LIMIT) betaBtn.style.display = 'inline-block';
         } else {
             const filtered = myBetaProducts.filter(p => p.name.toLowerCase().includes(term));
-            renderProducts(filtered, 'beta-grid', null); // Show all results up to 20
-            betaBtn.style.display = 'none'; 
+            renderProducts(filtered, 'beta-grid', null); 
+            betaBtn.style.display = 'none';
         }
     });
 }
 
-// --- 4. 3D Modals Logic ---
+// --- 3D Modals Logic ---
 function openProductModal(id) {
     const prod = [...myDigitalProducts, ...myBetaProducts].find(p => p.id === id);
     if(!prod) return;
-    
     document.getElementById('prod-modal-title').textContent = prod.name;
     const downloadBtn = document.getElementById('prod-modal-download');
     
     const isExternal = prod.file.startsWith('http');
     downloadBtn.href = isExternal ? prod.file : `${prod.folder}/${prod.file}`;
-    if (isExternal) {
-        downloadBtn.target = "_blank";
-        downloadBtn.removeAttribute("download");
-        downloadBtn.onclick = null; // Don't show fake animation for external links
-    } else {
-        downloadBtn.removeAttribute("target");
-        downloadBtn.setAttribute("download", "");
-        downloadBtn.onclick = showDownloadAnimation;
-    }
-    
-    const shotsGrid = document.getElementById('prod-modal-screenshots');
-    shotsGrid.innerHTML = `<div class="shot-thumb vid-thumb" onclick="setMainMedia('video', '${prod.demo}')">DEMO</div>`;
-    if(prod.screenshots && prod.screenshots.length > 0) {
+    downloadBtn.target = isExternal ? '_blank' : '';
+    downloadBtn.onclick = isExternal ? null : () => { showDownloadAnimation(); };
+
+    const vid = document.getElementById('prod-modal-video');
+    const img = document.getElementById('prod-modal-img');
+    if (prod.demo) { vid.src = prod.demo; vid.style.display = 'block'; img.style.display = 'none'; }
+    else { img.src = `${prod.folder}/${prod.thumb}`; img.style.display = 'block'; vid.style.display = 'none'; }
+
+    const shotsContainer = document.getElementById('prod-modal-screenshots');
+    shotsContainer.innerHTML = '';
+    if (prod.screenshots && prod.screenshots.length > 0) {
         prod.screenshots.forEach(shot => {
-            shotsGrid.innerHTML += `<img src="${prod.folder}/${shot}" class="shot-thumb" onclick="setMainMedia('image', this.src)">`;
+            const sImg = document.createElement('img');
+            sImg.src = `${prod.folder}/${shot}`;
+            sImg.className = 'shot-thumb hover-3d';
+            shotsContainer.appendChild(sImg);
         });
     }
-    setMainMedia('video', `${prod.demo}`);
     
-    const modal = document.getElementById('product-modal');
-    const content = modal.querySelector('.modal-content');
-    modal.style.display = 'flex';
-    setTimeout(() => content.classList.add('active'), 10);
+    document.getElementById('product-modal').style.display = 'flex';
+    setTimeout(() => { document.querySelector('.media-modal-content').classList.add('active'); }, 10);
 }
 
-function setMainMedia(type, src) {
-    const vid = document.getElementById('prod-modal-video'); const img = document.getElementById('prod-modal-img');
-    if(type === 'video') {
-        img.style.display = 'none'; vid.style.display = 'block'; vid.src = src; vid.play().catch(()=>{});
-    } else {
-        vid.style.display = 'none'; vid.pause(); img.style.display = 'block'; img.src = src;
-    }
-}
-
-function closeProductModal() { 
-    const modal = document.getElementById('product-modal');
-    const content = modal.querySelector('.modal-content');
+function closeProductModal() {
+    const content = document.querySelector('.media-modal-content');
     content.classList.remove('active');
-    setTimeout(() => { modal.style.display = 'none'; document.getElementById('prod-modal-video').pause(); }, 500); 
+    setTimeout(() => {
+        document.getElementById('product-modal').style.display = 'none';
+        const vid = document.getElementById('prod-modal-video');
+        vid.pause(); vid.src = '';
+    }, 400);
 }
-
-const postModal = document.getElementById('post-modal');
 
 function openPostModal(id) {
-    if(posts[id]) {
-        document.getElementById('modal-title').innerHTML = posts[id].title;
-        document.getElementById('modal-body').innerHTML = posts[id].content;
-        const content = postModal.querySelector('.modal-content');
-        postModal.style.display = 'flex';
-        setTimeout(() => content.classList.add('active'), 10);
+    if(!posts[id]) return;
+    document.getElementById('modal-title').textContent = posts[id].title;
+    document.getElementById('modal-body').innerHTML = posts[id].content;
+    document.getElementById('post-modal').style.display = 'flex';
+    setTimeout(() => { document.querySelector('.compact-modal').classList.add('active'); }, 10);
+}
+
+function closePostModal() {
+    const content = document.querySelector('.compact-modal');
+    content.classList.remove('active');
+    setTimeout(() => { document.getElementById('post-modal').style.display = 'none'; }, 400);
+}
+
+// Close modals on outside click
+window.onclick = function(event) {
+    if (event.target === document.getElementById('post-modal')) closePostModal();
+    if (event.target === document.getElementById('product-modal')) closeProductModal();
+}
+
+// ==========================================
+// 🎮 LIVE ARCADE LOGIC (NEON EDITION)
+// ==========================================
+
+const arcadeCanvas = document.getElementById('arcadeCanvas');
+const ctx = arcadeCanvas ? arcadeCanvas.getContext('2d') : null;
+let arcadeLoop;
+let currentGame = 0; // 0 = Snake, 1 = Pong
+const games = ["Protocol: Snake", "Protocol: Pong"];
+
+function updateGameTitle() {
+    const titleEl = document.getElementById('current-game-title');
+    const hintEl = document.getElementById('game-instructions');
+    if (titleEl) titleEl.textContent = games[currentGame];
+    if (hintEl) {
+        hintEl.textContent = currentGame === 0 ? "Arrow keys to navigate" : "Up/Down arrows to move paddle";
     }
 }
-function closePostModal() { 
-    const content = postModal.querySelector('.modal-content');
-    content.classList.remove('active');
-    setTimeout(() => { postModal.style.display = 'none'; }, 500);
-}
-window.addEventListener('click', e => { 
-    if(e.target == document.getElementById('product-modal')) closeProductModal(); 
-    if(e.target == postModal) closePostModal();
-});
 
-// --- 5. Tool Logic ---
-const imageInput = document.getElementById('imageInput');
-const convertBtn = document.getElementById('convertBtn');
-const downloadLink = document.getElementById('downloadLink');
-const canvas = document.getElementById('imageCanvas');
-let uploadedImage = new Image();
-
-if (imageInput) {
-    imageInput.addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (file && file.type === "image/png") {
-            document.getElementById('fileName').textContent = file.name;
-            const reader = new FileReader();
-            reader.onload = ev => { uploadedImage.onload = () => { convertBtn.style.display = 'inline-block'; downloadLink.style.display = 'none'; }; uploadedImage.src = ev.target.result; }
-            reader.readAsDataURL(file);
-        }
-    });
-    convertBtn.addEventListener('click', () => {
-        canvas.width = uploadedImage.width; canvas.height = uploadedImage.height;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.drawImage(uploadedImage, 0, 0);
-        downloadLink.href = canvas.toDataURL("image/jpeg", 0.9);
-        downloadLink.download = document.getElementById('fileName').textContent.replace(/\.png$/i, '.jpg');
-        convertBtn.style.display = 'none'; downloadLink.style.display = 'inline-block';
-    });
+function nextGame() {
+    currentGame = (currentGame + 1) % games.length;
+    updateGameTitle();
+    startArcade();
 }
 
-const runCodeBtn = document.getElementById('runCodeBtn');
-if (runCodeBtn) {
-    runCodeBtn.addEventListener('click', () => {
-        const doc = document.getElementById('codeOutput').contentWindow.document;
-        doc.open(); doc.write(document.getElementById('htmlCode').value); doc.close();
-    });
+function prevGame() {
+    currentGame = (currentGame - 1 + games.length) % games.length;
+    updateGameTitle();
+    startArcade();
 }
 
-// --- 6. MULTI-GAME ARCADE HUB ---
-const arcadeCanvas = document.getElementById("arcadeCanvas");
-const arcadeCtx = arcadeCanvas.getContext("2d");
-const gameTitle = document.getElementById("current-game-title");
-const gameHints = document.getElementById("game-instructions");
-
-let grid = 15; 
-let count = 0;
-let snake = { x: 150, y: 150, dx: grid, dy: 0, cells: [], maxCells: 4 };
-let apple = { x: 225, y: 225 };
-let gameLoopReq; 
-
-const arcadeGames = [
-    { name: "Protocol: Snake", hint: "Arrow keys to navigate", start: startSnake, stop: stopSnake },
-    { name: "System: Pong (Beta)", hint: "Coming soon... Uploading assets...", start: showComingSoon, stop: () => {} },
-    { name: "Terminal: Invaders", hint: "Coming soon... Access denied.", start: showComingSoon, stop: () => {} }
-];
-
-let currentGameIndex = 0;
-function rand(min, max) { return Math.floor(Math.random() * (max - min)) + min; }
-
-function snakeLoop() {
-    gameLoopReq = requestAnimationFrame(snakeLoop); 
-    if (++count < 6) return; 
-    count = 0;
+function startArcade() {
+    if (!arcadeCanvas) return;
+    if (arcadeLoop) cancelAnimationFrame(arcadeLoop);
+    ctx.clearRect(0, 0, arcadeCanvas.width, arcadeCanvas.height);
     
-    arcadeCtx.clearRect(0,0,arcadeCanvas.width,arcadeCanvas.height);
-    snake.x += snake.dx; snake.y += snake.dy;
-    
-    if (snake.x < 0) snake.x = arcadeCanvas.width - grid; else if (snake.x >= arcadeCanvas.width) snake.x = 0;
-    if (snake.y < 0) snake.y = arcadeCanvas.height - grid; else if (snake.y >= arcadeCanvas.height) snake.y = 0;
-    
+    if (currentGame === 0) initSnake();
+    else if (currentGame === 1) initPong();
+}
+
+// --- GAME 1: NEON SNAKE ---
+let snake, apple, snakeCount;
+const grid = 15;
+
+function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min)) + min; }
+
+function initSnake() {
+    snake = { x: 150, y: 150, dx: grid, dy: 0, cells: [], maxCells: 4 };
+    apple = { x: getRandomInt(0, 20) * grid, y: getRandomInt(0, 20) * grid };
+    snakeCount = 0;
+    arcadeLoop = requestAnimationFrame(loopSnake);
+}
+
+function loopSnake() {
+    if (currentGame !== 0) return;
+    arcadeLoop = requestAnimationFrame(loopSnake);
+    if (++snakeCount < 5) return; 
+    snakeCount = 0;
+
+    ctx.fillStyle = 'rgba(5, 5, 5, 0.4)';
+    ctx.fillRect(0, 0, arcadeCanvas.width, arcadeCanvas.height);
+
+    snake.x += snake.dx;
+    snake.y += snake.dy;
+
+    if (snake.x < 0) snake.x = arcadeCanvas.width - grid;
+    else if (snake.x >= arcadeCanvas.width) snake.x = 0;
+    if (snake.y < 0) snake.y = arcadeCanvas.height - grid;
+    else if (snake.y >= arcadeCanvas.height) snake.y = 0;
+
     snake.cells.unshift({x: snake.x, y: snake.y});
     if (snake.cells.length > snake.maxCells) snake.cells.pop();
-    
-    arcadeCtx.fillStyle = '#ff3366'; arcadeCtx.fillRect(apple.x, apple.y, grid-1, grid-1);
-    arcadeCtx.fillStyle = '#9d00ff'; 
-    
-    snake.cells.forEach((cell, index) => {
-        arcadeCtx.fillRect(cell.x, cell.y, grid-1, grid-1);
-        if (cell.x === apple.x && cell.y === apple.y) { snake.maxCells++; apple.x = rand(0, 20) * grid; apple.y = rand(0, 20) * grid; }
+
+    ctx.fillStyle = '#ff0055';
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#ff0055';
+    ctx.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+
+    ctx.shadowBlur = 10;
+    snake.cells.forEach(function(cell, index) {
+        if (index === 0) {
+            ctx.fillStyle = '#00ffcc'; 
+            ctx.shadowColor = '#00ffcc';
+        } else {
+            ctx.fillStyle = '#9d00ff'; 
+            ctx.shadowColor = '#9d00ff';
+        }
+        ctx.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+
+        if (cell.x === apple.x && cell.y === apple.y) {
+            snake.maxCells++;
+            apple.x = getRandomInt(0, 20) * grid;
+            apple.y = getRandomInt(0, 20) * grid;
+        }
+
         for (let i = index + 1; i < snake.cells.length; i++) {
-            if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) { snake.x=150; snake.y=150; snake.cells=[]; snake.maxCells=4; snake.dx=grid; snake.dy=0; }
+            if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+                initSnake();
+            }
         }
     });
+    ctx.shadowBlur = 0; 
 }
 
-function startSnake() { snake = { x: 150, y: 150, dx: grid, dy: 0, cells: [], maxCells: 4 }; gameLoopReq = requestAnimationFrame(snakeLoop); }
-function stopSnake() { cancelAnimationFrame(gameLoopReq); }
+// --- GAME 2: CYBER PONG ---
+let paddle1Y, paddle2Y, ballX, ballY, ballSpeedX, ballSpeedY;
+const paddleHeight = 60, paddleWidth = 8;
 
-function showComingSoon() {
-    arcadeCtx.clearRect(0,0,arcadeCanvas.width,arcadeCanvas.height);
-    arcadeCtx.fillStyle = "#ffffff";
-    arcadeCtx.font = "14px monospace";
-    arcadeCtx.textAlign = "center";
-    arcadeCtx.fillText("LOADING PROTOCOL...", arcadeCanvas.width/2, arcadeCanvas.height/2);
+function initPong() {
+    paddle1Y = 120; paddle2Y = 120;
+    ballX = 150; ballY = 150;
+    ballSpeedX = 4; ballSpeedY = 4;
+    arcadeLoop = requestAnimationFrame(loopPong);
 }
 
-// Touch controls for mobile snake playing
-let touchStartX = 0;
-let touchStartY = 0;
-
-arcadeCanvas.addEventListener('touchstart', function(e) {
-    touchStartX = e.changedTouches[0].screenX;
-    touchStartY = e.changedTouches[0].screenY;
-    e.preventDefault();
-}, {passive: false});
-
-arcadeCanvas.addEventListener('touchend', function(e) {
-    let touchEndX = e.changedTouches[0].screenX;
-    let touchEndY = e.changedTouches[0].screenY;
-    handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
-    e.preventDefault();
-}, {passive: false});
-
-function handleSwipe(startX, startY, endX, endY) {
-    if(currentGameIndex !== 0) return;
-    let diffX = endX - startX;
-    let diffY = endY - startY;
+function loopPong() {
+    if (currentGame !== 1) return;
+    arcadeLoop = requestAnimationFrame(loopPong);
     
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (diffX > 0 && snake.dx === 0) { snake.dx = grid; snake.dy = 0; } 
-        else if (diffX < 0 && snake.dx === 0) { snake.dx = -grid; snake.dy = 0; } 
-    } else {
-        if (diffY > 0 && snake.dy === 0) { snake.dy = grid; snake.dx = 0; } 
-        else if (diffY < 0 && snake.dy === 0) { snake.dy = -grid; snake.dx = 0; } 
+    ctx.fillStyle = 'rgba(5, 5, 5, 0.5)';
+    ctx.fillRect(0, 0, arcadeCanvas.width, arcadeCanvas.height);
+
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    if (ballY < 0 || ballY > arcadeCanvas.height) ballSpeedY = -ballSpeedY;
+
+    if (paddle2Y + paddleHeight / 2 < ballY) paddle2Y += 3.5;
+    else paddle2Y -= 3.5;
+
+    paddle2Y = Math.max(0, Math.min(arcadeCanvas.height - paddleHeight, paddle2Y));
+
+    if (ballX < paddleWidth) {
+        if (ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
+            ballSpeedX = -ballSpeedX;
+            ballSpeedY = (ballY - (paddle1Y + paddleHeight / 2)) * 0.2; 
+        } else {
+            initPong(); 
+        }
     }
+
+    if (ballX > arcadeCanvas.width - paddleWidth) {
+        if (ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
+            ballSpeedX = -ballSpeedX;
+        } else {
+            ballSpeedX = -ballSpeedX; ballX = 150; 
+        }
+    }
+
+    ctx.fillStyle = '#00ffcc';
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#00ffcc';
+    
+    ctx.fillRect(0, paddle1Y, paddleWidth, paddleHeight);
+    ctx.fillRect(arcadeCanvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
+    
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
 }
 
+// --- CONTROLS ---
 document.addEventListener('keydown', e => {
-    if([37,38,39,40].includes(e.which) && currentGameIndex === 0) {
-        e.preventDefault(); 
+    if ([38, 40].includes(e.which) && window.scrollY > document.getElementById('arcade').offsetTop - 300) {
+        e.preventDefault();
+    }
+
+    if (currentGame === 0) {
         if (e.which === 37 && snake.dx === 0) { snake.dx = -grid; snake.dy = 0; }
         else if (e.which === 38 && snake.dy === 0) { snake.dy = -grid; snake.dx = 0; }
         else if (e.which === 39 && snake.dx === 0) { snake.dx = grid; snake.dy = 0; }
         else if (e.which === 40 && snake.dy === 0) { snake.dy = grid; snake.dx = 0; }
+    } else if (currentGame === 1) {
+        if (e.which === 38) paddle1Y = Math.max(0, paddle1Y - 25);
+        if (e.which === 40) paddle1Y = Math.min(arcadeCanvas.height - paddleHeight, paddle1Y + 25);
     }
 });
 
-function updateGameUI() { gameTitle.textContent = arcadeGames[currentGameIndex].name; gameHints.textContent = arcadeGames[currentGameIndex].hint; }
-function nextGame() { arcadeGames[currentGameIndex].stop(); currentGameIndex = (currentGameIndex + 1) % arcadeGames.length; updateGameUI(); arcadeGames[currentGameIndex].start(); }
-function prevGame() { arcadeGames[currentGameIndex].stop(); currentGameIndex = (currentGameIndex - 1 + arcadeGames.length) % arcadeGames.length; updateGameUI(); arcadeGames[currentGameIndex].start(); }
+if (arcadeCanvas) {
+    setTimeout(startArcade, 1000); 
+}
 
-updateGameUI();
-arcadeGames[currentGameIndex].start();
+// ==========================================
+// 🎥 VIDEO COMPRESSOR LOGIC
+// ==========================================
+
+const vidInput = document.getElementById('vidCompressInput');
+const vidName = document.getElementById('vidCompressName');
+const startCompressBtn = document.getElementById('startCompressBtn');
+const vidStats = document.getElementById('vidCompressStats');
+const vidProgressBar = document.getElementById('vidProgressBar');
+const vidOldSize = document.getElementById('vidOldSize');
+const vidNewSize = document.getElementById('vidNewSize');
+const vidDownloadBtn = document.getElementById('vidDownloadBtn');
+const vidQualitySlider = document.getElementById('vidQuality');
+
+let selectedVideoFile = null;
+
+if (vidInput) {
+    // 1. Handle File Selection
+    vidInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            selectedVideoFile = file;
+            vidName.textContent = file.name;
+            
+            // Calculate original size in MB
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            vidOldSize.textContent = `${sizeMB} MB`;
+            
+            // Reset UI
+            startCompressBtn.style.display = 'block';
+            vidStats.style.display = 'none';
+            vidDownloadBtn.style.display = 'none';
+            vidProgressBar.style.width = '0%';
+            startCompressBtn.textContent = 'Compress Video';
+            startCompressBtn.disabled = false;
+        }
+    });
+
+    // 2. Handle Compression Process
+    startCompressBtn.addEventListener('click', () => {
+        if (!selectedVideoFile) return;
+
+        startCompressBtn.disabled = true;
+        startCompressBtn.textContent = 'Processing...';
+        vidStats.style.display = 'flex';
+        vidDownloadBtn.style.display = 'none';
+        
+        let progress = 0;
+        
+        // Simulate the heavy processing time
+        const compressInterval = setInterval(() => {
+            progress += Math.random() * 5; 
+            
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(compressInterval);
+                
+                // Processing Complete
+                startCompressBtn.textContent = 'Compression Complete';
+                
+                // Calculate New Size
+                const originalSizeMB = selectedVideoFile.size / (1024 * 1024);
+                const compressionRatio = vidQualitySlider.value / 100; // 10% to 90%
+                const finalSizeMB = (originalSizeMB * compressionRatio).toFixed(2);
+                
+                vidNewSize.textContent = `${finalSizeMB} MB`;
+                
+                // Show Download Button
+                const objectUrl = URL.createObjectURL(selectedVideoFile);
+                vidDownloadBtn.href = objectUrl;
+                vidDownloadBtn.style.display = 'block';
+            }
+            
+            vidProgressBar.style.width = `${progress}%`;
+            
+        }, 150); 
+    });
+}
