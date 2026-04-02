@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Janith Rathnayake | Workspace</title>
+    <link rel="icon" href="other images/logo.png" type="image/png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="splash-screen" id="loader">
+        <video autoplay loop muted playsinline class="splash-video" id="splashVideo">
+            <source src="cinematic animations/splash.mp4" type="video/mp4">
+        </video>
+        <div class="splash-overlay"></div>
+        <div class="splash-content">
+            <h1 class="neon-text">Janith Rathnayake</h1>
+            <p class="neon-sub">INITIALIZING WORKSPACE</p>
+        </div>
+    </div>
+
+    <video autoplay loop muted playsinline class="space-bg">
+        <source src="cinematic animations/background.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+
+    <nav class="glass-nav">
+        <div class="nav-links">
+            <a href="#products" class="hover-3d">Store</a>
+            <a href="#beta-vault" class="hover-3d">Vault</a>
+        </div>
+        <div class="logo-container hover-3d">
+            <a href="https://github.com/janidesh" target="_blank">
+                <img src="other images/logo.png" alt="JR Logo" class="glowing-logo" onerror="this.src=''; this.alt='JR';">
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="#test-area" class="hover-3d">Tools</a>
+            <a href="#contact" class="hover-3d">Contact</a>
+        </div>
+    </nav>
+
+    <div id="main-content">
+        
+        <section id="products" class="section-container">
+            <div class="section-header">
+                <div class="header-text">
+                    <h2 class="section-title">Premium Assets</h2>
+                    <p class="section-desc">High-tier, production-ready tools, templates, and full source codes built for creators.</p>
+                </div>
+            </div>
+            <div id="main-products-grid" class="grid-layout"></div>
+            <div class="view-all-container">
+                <button id="viewAllProductsBtn" class="glass-btn outline-btn hover-3d-btn" style="display: none; width: 150px;">View All</button>
+            </div>
+        </section>
+
+        <section id="beta-vault" class="section-container">
+            <div class="section-header">
+                <div class="header-text">
+                    <h2 class="section-title">The Vault</h2>
+                    <p class="section-desc">Experimental beta builds, trial software, and early-access prototypes. Proceed with curiosity.</p>
+                </div>
+                <input type="text" id="betaSearch" class="glass-input compact-search hover-3d" placeholder="Search files...">
+            </div>
+            <div id="beta-grid" class="grid-layout beta-scroll-box"></div>
+            <div class="view-all-container">
+                <button id="viewAllBetaBtn" class="glass-btn outline-btn hover-3d-btn" style="display: none; width: 150px;">View All</button>
+            </div>
+        </section>
+
+        <section id="posts" class="section-container">
+            <div class="section-header">
+                <div class="header-text">
+                    <h2 class="section-title">Dev Logs</h2>
+                    <p class="section-desc">Behind-the-scenes transmissions, architecture overviews, and future roadmaps.</p>
+                </div>
+            </div>
+            <div class="grid-layout">
+                <div class="glass-panel post-card hover-3d" onclick="openPostModal('post1')">
+                    <img src="posts/thumbnail1.jpg" alt="Post" class="post-thumb" onerror="this.style.display='none'">
+                    <div class="post-info">
+                        <h3>Project 2026 Engine</h3>
+                        <p>Architecture overview and roadmap.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="test-area" class="section-container">
+            <div class="section-header">
+                <div class="header-text">
+                    <h2 class="section-title">Utilities</h2>
+                    <p class="section-desc">Handy browser-based scripts and local converters for everyday development.</p>
+                </div>
+            </div>
+            <div class="grid-layout tools-grid">
+                <div class="glass-panel tool-card hover-3d">
+                    <div class="tool-header">
+                        <h3>PNG to JPG</h3>
+                        <span class="badge">Local</span>
+                    </div>
+                    <div class="tool-content">
+                        <input type="file" id="imageInput" accept="image/png" class="file-input">
+                        <label for="imageInput" class="glass-btn outline-btn hover-3d-btn">Select File</label>
+                        <p id="fileName" class="file-name">No file selected</p>
+                        <button id="convertBtn" class="glass-btn action-btn hover-3d-btn" style="display:none;">Convert</button>
+                        <a id="downloadLink" class="glass-btn success-btn hover-3d-btn" style="display:none;" download="converted.jpg" onclick="showDownloadAnimation()">Download JPG</a>
+                        <canvas id="imageCanvas" style="display:none;"></canvas>
+                    </div>
+                </div>
+                <div class="glass-panel tool-card compiler-card hover-3d">
+                    <div class="tool-header">
+                        <h3>Live Sandbox</h3>
+                        <button id="runCodeBtn" class="glass-btn outline-btn run-btn hover-3d-btn">Run</button>
+                    </div>
+                    <div class="compiler-split">
+                        <textarea id="htmlCode" placeholder="Write HTML/JS here..."></textarea>
+                        <iframe id="codeOutput" title="Output"></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="arcade" class="section-container">
+            <div class="section-header">
+                <div class="header-text">
+                    <h2 class="section-title">Live Arcade</h2>
+                    <p class="section-desc">Interactive test protocols. Take a break and beat the high score.</p>
+                </div>
+            </div>
+            <div class="glass-panel game-container hover-3d">
+                <div class="arcade-nav">
+                    <button class="glass-btn outline-btn hover-3d-btn" onclick="prevGame()">&#8592; Prev</button>
+                    <h3 id="current-game-title" style="color: #b026ff; margin: 0 15px;">Protocol: Snake</h3>
+                    <button class="glass-btn outline-btn hover-3d-btn" onclick="nextGame()">Next &#8594;</button>
+                </div>
+                <canvas id="arcadeCanvas" width="300" height="300"></canvas>
+                <p id="game-instructions" class="game-hint">Arrow keys to navigate</p>
+            </div>
+        </section>
+
+        <section id="contact" class="section-container">
+            <div class="section-header">
+                <div class="header-text">
+                    <h2 class="section-title">Comm Link</h2>
+                    <p class="section-desc">Establish a secure connection for freelance work or collaborations.</p>
+                </div>
+            </div>
+            <div class="glass-panel" style="text-align: center; padding: 40px 20px; position: relative; z-index: 50;">
+                <h3 style="margin-top:0; font-size: 1.5rem;">Ready to initialize a project?</h3>
+                <p class="section-desc" style="margin: 10px auto 25px auto;">Drop me a message and let's build something next-level.</p>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <a href="mailto:janithrathnayake650@gmail.com" class="glass-btn action-btn hover-3d-btn">Email Me</a>
+                    <a href="https://github.com/janidesh" target="_blank" rel="noopener noreferrer" class="glass-btn outline-btn hover-3d-btn">GitHub</a>
+                    <a href="https://www.linkedin.com/in/janith-rathnayake-a33b4b378" target="_blank" rel="noopener noreferrer" class="glass-btn outline-btn hover-3d-btn">LinkedIn</a>
+                    <a href="https://share.streamlit.io/?aliId=eyJpIjoiR29zS081OVJYenNaRVhXMCIsInQiOiIwVk5aZnZSRGJzdUw2U09hdGVwUFBnPT0ifQ%253D%253D" target="_blank" rel="noopener noreferrer" class="glass-btn outline-btn hover-3d-btn">Streamlit</a>
+                    <a href="https://www.instagram.com/jani_deshh?igsh=YzljYTk1ODg3Zg==" target="_blank" rel="noopener noreferrer" class="glass-btn outline-btn hover-3d-btn">Instagram</a>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="post-modal" class="glass-modal">
+        <div class="modal-content compact-modal">
+            <span class="close-btn" onclick="closePostModal()">&times;</span>
+            <h2 id="modal-title">Title</h2>
+            <div id="modal-body" class="modal-text"></div>
+        </div>
+    </div>
+
+    <div id="product-modal" class="glass-modal">
+        <div class="modal-content media-modal-content">
+            <span class="close-btn" onclick="closeProductModal()">&times;</span>
+            <div class="modal-header-compact">
+                <h2 id="prod-modal-title">Product</h2>
+                <a id="prod-modal-download" href="#" class="glass-btn success-btn small-btn hover-3d-btn" onclick="showDownloadAnimation()">Get File</a>
+            </div>
+            <div class="modal-media-gallery">
+                <div class="main-viewer">
+                    <video id="prod-modal-video" autoplay loop muted playsinline style="display:none;"></video>
+                    <img id="prod-modal-img" src="" style="display:none;">
+                </div>
+                <div id="prod-modal-screenshots" class="screenshots-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="download-overlay" class="glass-modal dl-overlay">
+        <div class="download-3d-card" id="dl-card">
+            <div class="cube-spinner"></div>
+            <h3 class="download-text">Processing</h3>
+            <p class="download-sub">Decrypting files from the vault...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
