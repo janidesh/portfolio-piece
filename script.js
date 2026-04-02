@@ -56,7 +56,35 @@ const myBetaProducts = [
 ];
 
 const posts = { 
-    'post1': { title: "Project 2026 Engine", content: "<p>Details on the new custom engine...</p>" } 
+    'post1': { 
+        title: "Project 2026 Engine", 
+        
+        content: `<p> new custom engine is almost ready to go power up with unity and unreal engine 5...</p>
+        <img src="posts/thumbnail1.jpg" style="width: 100%; border-radius: 8px; margin: 15px 0; border: 1px solid rgba(255,255,255,0.1);">
+        
+        
+        
+        
+        `
+        
+    },
+    
+    // NEW: Add a comma after post1, and add post2 here!
+    'post2': { 
+        title: "New AI Features Coming", 
+        content: `
+            <p>We are currently upgrading the core systems. Here is a sneak peek at the new user interface that will be dropping in V2.0.</p>
+            
+            <img src="posts/sneak-peek.jpg" style="width: 100%; border-radius: 8px; margin: 15px 0; border: 1px solid rgba(255,255,255,0.1);">
+            
+            <p>Expect faster loading times, better mobile responsiveness, and deeper neural network integration.</p>
+            <ul>
+                <li>Responsive 3D Glass UI</li>
+                <li>Live WebWASM Video Compression</li>
+                <li>Upgraded Arcade Protocols</li>
+            </ul>
+        ` 
+    } 
 };
 
 // ==========================================
