@@ -31,7 +31,7 @@
             <a href="#beta-vault" class="hover-3d">Vault</a>
         </div>
         <div class="logo-container hover-3d">
-            <a href="https://jdr.kesug.com" target="_blank">
+            <a href="https://github.com/janidesh" target="_blank">
                 <img src="other images/logo.png" alt="JR Logo" class="glowing-logo" onerror="this.src=''; this.alt='JR';">
             </a>
         </div>
@@ -46,6 +46,76 @@
         <section id="products" class="section-container">
             <div class="section-header">
                 <div class="header-text">
+
+<div id="janith-gpt-container" style="border: 1px solid #ddd; padding: 20px; border-radius: 12px; margin-bottom: 30px; background: #f9f9f9;">
+  <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+    🤖 Janith GPT
+  </h3>
+  
+  <div id="chat-history" style="height: 250px; overflow-y: auto; border: 1px solid #ccc; background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-family: sans-serif;">
+    <p><strong>Janith GPT:</strong> Hello! I'm Janith GPT. How can I help you today?</p>
+  </div>
+  
+  <div style="display: flex; gap: 10px;">
+    <input type="text" id="chat-input" placeholder="Ask Janith GPT something..." style="flex-grow: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc;" onkeypress="handleEnter(event)">
+    <button onclick="sendMessage()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">Send</button>
+  </div>
+</div>
+
+<script>
+  // Array to store the conversation history
+  let conversationHistory = [];
+
+  // Allow pressing "Enter" to send
+  function handleEnter(event) {
+    if (event.key === 'Enter') sendMessage();
+  }
+
+  async function sendMessage() {
+    const inputField = document.getElementById('chat-input');
+    const historyBox = document.getElementById('chat-history');
+    const userText = inputField.value.trim();
+
+    if (!userText) return;
+
+    // 1. Display User Message
+    historyBox.innerHTML += `<p style="text-align: right;"><strong>You:</strong> ${userText}</p>`;
+    
+    // 2. Add to history array
+    conversationHistory.push({ role: "user", content: userText });
+    
+    // 3. Clear input and show loading indicator
+    inputField.value = '';
+    const loadingId = 'loading-' + Date.now();
+    historyBox.innerHTML += `<p id="${loadingId}" style="color: #666;"><em>Janith GPT is thinking...</em></p>`;
+    historyBox.scrollTop = historyBox.scrollHeight; // Scroll to bottom
+
+    try {
+      // 4. Send history to our Cloudflare Function
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: conversationHistory })
+      });
+
+      const data = await response.json();
+      const aiText = data.choices[0].message.content;
+
+      // 5. Remove loading, display AI response, and save to history
+      document.getElementById(loadingId).remove();
+      
+      // Convert basic markdown/newlines to HTML
+      const formattedText = aiText.replace(/\n/g, '<br>');
+      historyBox.innerHTML += `<p><strong>Janith GPT:</strong> ${formattedText}</p>`;
+      conversationHistory.push({ role: "assistant", content: aiText });
+
+    } catch (error) {
+      document.getElementById(loadingId).innerHTML = `<span style="color:red">Sorry, I encountered an error.</span>`;
+    }
+    
+    historyBox.scrollTop = historyBox.scrollHeight; // Scroll to bottom
+  }
+</script>
                     <h2 class="section-title">Premium Assets</h2>
                     <p class="section-desc">High-tier, production-ready tools, templates, and full source codes built for creators.</p>
                 </div>
