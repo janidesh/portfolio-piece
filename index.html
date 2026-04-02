@@ -70,12 +70,18 @@
   function handleEnter(event) {
     if (event.key === 'Enter') sendMessage();
   }
-
-  async function sendMessage() {
+// Inside your <script> in index.html
+async function sendMessage() {
     const inputField = document.getElementById('chat-input');
-    const historyBox = document.getElementById('chat-history');
     const userText = inputField.value.trim();
+    if (!userText) return;
 
+    // ADD THIS LINE: Make sure the message is in the array first!
+    conversationHistory.push({ role: "user", content: userText });
+    
+    // ... then do your fetch to /api/chat ...
+}
+ 
     if (!userText) return;
 
     // 1. Display User Message
