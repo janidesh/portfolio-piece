@@ -65,16 +65,11 @@
   let conversationHistory = [];
 
   async function sendMessage() {
-      console.log("1. Send button clicked"); 
-      
       const inputField = document.getElementById('chat-input');
       const historyBox = document.getElementById('chat-history');
       const userText = inputField.value.trim();
 
-      if (!userText) {
-          console.log("2. Input was empty, stopping.");
-          return;
-      }
+      if (!userText) return;
 
       historyBox.innerHTML += `<p style="text-align: right;"><strong>You:</strong> ${userText}</p>`;
       conversationHistory.push({ role: "user", content: userText });

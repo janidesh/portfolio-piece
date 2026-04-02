@@ -210,7 +210,6 @@ function closePostModal() {
     setTimeout(() => { document.getElementById('post-modal').style.display = 'none'; }, 400);
 }
 
-// Close modals on outside click
 window.onclick = function(event) {
     if (event.target === document.getElementById('post-modal')) closePostModal();
     if (event.target === document.getElementById('product-modal')) closeProductModal();
@@ -223,7 +222,7 @@ window.onclick = function(event) {
 const arcadeCanvas = document.getElementById('arcadeCanvas');
 const ctx = arcadeCanvas ? arcadeCanvas.getContext('2d') : null;
 let arcadeLoop;
-let currentGame = 0; // 0 = Snake, 1 = Pong
+let currentGame = 0; 
 const games = ["Protocol: Snake", "Protocol: Pong"];
 
 function updateGameTitle() {
@@ -416,18 +415,15 @@ const vidQualitySlider = document.getElementById('vidQuality');
 let selectedVideoFile = null;
 
 if (vidInput) {
-    // 1. Handle File Selection
     vidInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
             selectedVideoFile = file;
             vidName.textContent = file.name;
             
-            // Calculate original size in MB
             const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
             vidOldSize.textContent = `${sizeMB} MB`;
             
-            // Reset UI
             startCompressBtn.style.display = 'block';
             vidStats.style.display = 'none';
             vidDownloadBtn.style.display = 'none';
@@ -437,7 +433,6 @@ if (vidInput) {
         }
     });
 
-    // 2. Handle Compression Process
     startCompressBtn.addEventListener('click', () => {
         if (!selectedVideoFile) return;
 
@@ -448,7 +443,6 @@ if (vidInput) {
         
         let progress = 0;
         
-        // Simulate the heavy processing time
         const compressInterval = setInterval(() => {
             progress += Math.random() * 5; 
             
@@ -456,17 +450,14 @@ if (vidInput) {
                 progress = 100;
                 clearInterval(compressInterval);
                 
-                // Processing Complete
                 startCompressBtn.textContent = 'Compression Complete';
                 
-                // Calculate New Size
                 const originalSizeMB = selectedVideoFile.size / (1024 * 1024);
-                const compressionRatio = vidQualitySlider.value / 100; // 10% to 90%
+                const compressionRatio = vidQualitySlider.value / 100; 
                 const finalSizeMB = (originalSizeMB * compressionRatio).toFixed(2);
                 
                 vidNewSize.textContent = `${finalSizeMB} MB`;
                 
-                // Show Download Button
                 const objectUrl = URL.createObjectURL(selectedVideoFile);
                 vidDownloadBtn.href = objectUrl;
                 vidDownloadBtn.style.display = 'block';

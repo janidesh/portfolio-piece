@@ -177,21 +177,17 @@ html, body {
     100% { transform: perspective(200px) rotateX(-180deg) rotateY(-180deg); }
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .glass-nav { width: 95%; padding: 6px 15px; }
-    .nav-links a { margin: 0 5px; font-size: 0.75rem; }
-    .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .compact-search { width: 100%; }
-    .grid-layout { grid-template-columns: 1fr; }
-}
 
 /* --- 🚀 JANITH GPT 3D GLASS INTERFACE 🚀 --- */
-
 .janith-gpt-3d-glass {
     width: 100%;
     max-width: 650px; 
-    height: 650px;    
+    
+    /* 🚀 RESPONSIVE HEIGHT 🚀 */
+    height: 70vh; 
+    min-height: 400px;
+    max-height: 650px;
+    
     margin: 0 auto 40px auto;
     display: flex;
     flex-direction: column;
@@ -291,4 +287,44 @@ html, body {
     font-size: 1.05rem;
     border-radius: 12px;
     font-weight: bold;
+}
+
+/* 📱 MOBILE OPTIMIZATION FOR THE WHOLE SITE 📱 */
+@media (max-width: 600px) {
+    .glass-nav { width: 95%; padding: 6px 15px; }
+    .nav-links a { margin: 0 5px; font-size: 0.75rem; }
+    .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .compact-search { width: 100%; }
+    .grid-layout { grid-template-columns: 1fr; }
+
+    /* Janith GPT Mobile Adjustments */
+    .janith-gpt-3d-glass {
+        height: 75vh;       
+        padding: 15px;      
+        border-radius: 15px; 
+    }
+
+    .chat-header h3 {
+        font-size: 1.3rem;  
+        margin: 0 0 15px 0;
+    }
+
+    .glass-chat-history {
+        padding: 15px;
+        font-size: 0.9rem;  
+    }
+
+    .chat-input-area {
+        gap: 8px; 
+    }
+
+    .glass-chat-input {
+        padding: 12px 15px; 
+        font-size: 0.95rem;
+    }
+
+    .chat-send-btn {
+        padding: 0 15px;    
+        font-size: 0.95rem;
+    }
 }

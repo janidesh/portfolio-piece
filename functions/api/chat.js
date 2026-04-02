@@ -12,10 +12,10 @@ export async function onRequestPost(context) {
     // 3. Define the System Prompt (Janith GPT's personality)
     const systemMessage = {
       role: "system",
-      content: "You are Janith GPT, a helpful assistant. You are friendly and concise."
+      content: "You are Janith GPT, a highly advanced, futuristic AI assistant embedded in Janith Rathnayake's workspace. You are friendly, concise, and helpful."
     };
 
-    // 4. Call Groq
+    // 4. Call Groq API
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -33,14 +33,16 @@ export async function onRequestPost(context) {
 
     // 5. Handle Groq's internal errors
     if (!groqResponse.ok) {
-      return new Response(JSON.stringify({ error: data.error?.message || "Groq API Error" }), { status: groqResponse.status });
+      return new Response(JSON.stringify({ error: data.error?.message || "Failed to fetch from Groq" }), { status: groqResponse.status });
     }
 
+    // 6. Return the success payload to the front-end
     return new Response(JSON.stringify(data), {
       headers: { "Content-Type": "application/json" }
     });
 
   } catch (error) {
+    // Catch any syntax/network errors from our worker
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
