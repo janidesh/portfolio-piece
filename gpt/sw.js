@@ -1,41 +1,42 @@
-const CACHE_NAME = 'janith-gpt-app-v2';
-const urlsToCache = [
-  './index.html',
-  './gpt-style.css',
-  '../other images/logo.png'
+const CACHE_NAME = 'janith-gpt-v5';
+
+// Only cache the bare minimum for the app to start
+const ASSETS = [
+  '/gpt/',
+  '/gpt/index.html',
+  '/gpt/gpt-style.css',
+  '/other images/logo.png'
 ];
 
-// Install Event
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
+  self.skipWaiting(); // Forces the new service worker to take over immediately
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
-// Fetch Event with Redirect Support
-self.addEventListener('fetch', event => {
-  // Skip cross-origin requests and non-GET requests (like your AI API)
-  if (!event.request.url.startsWith(self.location.origin) || event.request.method !== 'GET') {
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim()); // Become the active worker for all open tabs
+});
+
+// FIXED FETCH LOGIC:
+self.addEventListener('fetch', (event) => {
+  // 1. Let API calls (Groq) go straight to the network
+  if (event.request.url.includes('/api/')) return;
+
+  // 2. For page navigation, always try the Network FIRST
+  // This prevents the ERR_FAILED redirect error
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/gpt/index.html'))
+    );
     return;
   }
 
+  // 3. For images/css, try cache then network
   event.respondWith(
-    caches.match(event.request).then(response => {
-      if (response) return response;
-
-      // Force "follow" on redirects to prevent the network error you saw
-      return fetch(event.request, { redirect: 'follow' })
-        .then(networkResponse => {
-          // Check if we received a valid response
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse;
-          }
-          return networkResponse;
-        })
-        .catch(() => {
-          // Fallback if network fails completely
-          return caches.match('./index.html');
-        });
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
     })
   );
 });
