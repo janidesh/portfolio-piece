@@ -297,6 +297,34 @@ html, body {
     .compact-search { width: 100%; }
     .grid-layout { grid-template-columns: 1fr; }
 
+    /* --- JANITH GPT SCROLLABLE CHAT BOX FIX --- */
+#chat-history {
+    max-height: 55vh; /* Prevents the chat from pushing the input box off-screen */
+    overflow-y: auto; /* Enables vertical scrolling when messages overflow */
+    overflow-x: hidden; /* Stops horizontal scrolling bugs */
+    padding-right: 10px; /* Gives a little breathing room for the scrollbar */
+    display: flex;
+    flex-direction: column;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; /* Forces buttery-smooth scrolling on Android/iOS */
+}
+
+/* Custom Sleek Scrollbar to match your Cyber/Glass theme */
+#chat-history::-webkit-scrollbar {
+    width: 5px;
+}
+#chat-history::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05); 
+    border-radius: 10px;
+}
+#chat-history::-webkit-scrollbar-thumb {
+    background: var(--primary); /* Uses your purple glow color */
+    border-radius: 10px;
+}
+#chat-history::-webkit-scrollbar-thumb:hover {
+    background: #b533ff;
+}
+
     /* Janith GPT Mobile Adjustments */
     .janith-gpt-3d-glass {
         height: 75vh;       

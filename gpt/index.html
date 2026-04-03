@@ -7,16 +7,24 @@
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0a0c">
-    
     <link rel="icon" href="../other images/logo.png" type="image/png">
-    <link rel="stylesheet" href="gpt-style.css">
+    
+    <link rel="stylesheet" href="gpt-style.css?v=9">
 </head>
 <body>
+
+    <video autoplay loop muted playsinline class="space-bg">
+        <source src="../cinematic animations/background.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
     <div class="app-container">
         
-        <button id="install-btn" class="glass-btn" style="display: none; margin-bottom: 15px; background-color: #00ffcc; color: black;">
-            ⬇️ Install Janith GPT to Device
+        <button id="install-btn" class="glass-btn" style="display: none; margin-bottom: 15px; background-color: #00ffcc; color: black; font-weight: bold; width: 100%;">
+            ⬇️ Install Janith GPT App
         </button>
+
+        ```
+
 
         <div id="janith-gpt-container" class="janith-gpt-3d-glass">
           <div class="chat-header">
@@ -24,40 +32,91 @@
           </div>
           
           <div id="chat-history" class="glass-chat-history">
-            <p><strong>Janith GPT:</strong> Hello! I'm Janith GPT. How can I help you today?</p>
+            <p><strong>Janith:</strong> I'm Janith. I built this workspace. Drop an image or ask me anything. What's up?</p>
           </div>
           
+          <div id="image-preview-container" style="display: none; margin-bottom: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; text-align: center;">
+              <img id="image-preview" style="max-height: 100px; border-radius: 8px; border: 1px solid #9d00ff;">
+              <span onclick="removeImage()" style="cursor: pointer; color: #ff3366; margin-left: 15px; font-weight: bold; vertical-align: top;">❌ Remove</span>
+          </div>
+
           <div class="chat-input-area">
-            <input type="text" id="chat-input" class="glass-chat-input" placeholder="Ask Janith GPT..." onkeypress="handleEnter(event)">
-            <button onclick="sendMessage()" class="glass-btn action-btn">Send</button>
+            <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="previewImage(event)">
+            
+            <button onclick="document.getElementById('file-input').click()" class="glass-btn" style="padding: 0 15px; background: rgba(255,255,255,0.1);">📎</button>
+            
+            <input type="text" id="chat-input" class="glass-chat-input" placeholder="Message or upload image..." onkeypress="handleEnter(event)">
+            <button onclick="sendMessage()" class="glass-btn">Send</button>
           </div>
         </div>
     </div>
 
     <script>
       let conversationHistory = [];
+      let base64Image = null;
 
-      // --- CHAT LOGIC ---
+      // --- 1. IMAGE HANDLING ---
+      function previewImage(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function(e) {
+              base64Image = e.target.result;
+              document.getElementById('image-preview').src = base64Image;
+              document.getElementById('image-preview-container').style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+      }
+
+      function removeImage() {
+          base64Image = null;
+          document.getElementById('file-input').value = '';
+          document.getElementById('image-preview-container').style.display = 'none';
+      }
+
+      // --- 2. CHAT LOGIC ---
       async function sendMessage() {
           const inputField = document.getElementById('chat-input');
           const historyBox = document.getElementById('chat-history');
           const userText = inputField.value.trim();
 
-          if (!userText) return;
+          // Stop if totally empty
+          if (!userText && !base64Image) return; 
 
-          historyBox.innerHTML += `<p style="text-align: right; color:#e2e2e2;"><strong>You:</strong> ${userText}</p>`;
-          conversationHistory.push({ role: "user", content: userText });
+          // Build User UI
+          let uiMessage = `<p style="text-align: right; color:#e2e2e2;"><strong>You:</strong> ${userText}</p>`;
+          if (base64Image) {
+              uiMessage += `<div style="text-align: right;"><img src="${base64Image}" style="max-height: 150px; border-radius: 8px;"></div>`;
+          }
+          historyBox.innerHTML += uiMessage;
+
+          // Format for Vision Model vs Text Model
+          let messageContent = base64Image ? [
+              { type: "text", text: userText || "What is in this image?" },
+              { type: "image_url", image_url: { url: base64Image } }
+          ] : userText;
+
+          // Save to memory
+          conversationHistory.push({ role: "user", content: messageContent });
+
+          // Reset inputs
           inputField.value = '';
+          removeImage();
           
+          // Show loading
           const loadingId = 'loading-' + Date.now();
-          historyBox.innerHTML += `<p id="${loadingId}" style="color: #9d00ff;"><em>Janith GPT is thinking...</em></p>`;
+          historyBox.innerHTML += `<p id="${loadingId}" style="color: #9d00ff;"><em>Janith is analyzing...</em></p>`;
           historyBox.scrollTop = historyBox.scrollHeight;
 
           try {
+              // Memory Limit: Only send last 10 messages to prevent crashing Groq
+              let messagesToSend = conversationHistory.length > 10 ? conversationHistory.slice(-10) : conversationHistory;
+
               const response = await fetch('/api/chat', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ messages: conversationHistory })
+                  body: JSON.stringify({ messages: messagesToSend })
               });
 
               const data = await response.json();
@@ -66,26 +125,28 @@
               const aiText = data.choices[0].message.content;
               document.getElementById(loadingId).remove();
               
-              historyBox.innerHTML += `<p style="color:#00ffcc;"><strong>Janith GPT:</strong> ${aiText.replace(/\n/g, '<br>')}</p>`;
+              historyBox.innerHTML += `<p style="color:#00ffcc;"><strong>Janith:</strong> ${aiText.replace(/\n/g, '<br>')}</p>`;
+              
+              // Only save AI text back to memory
               conversationHistory.push({ role: "assistant", content: aiText });
 
           } catch (error) {
               console.error("ERROR:", error);
               const loader = document.getElementById(loadingId);
-              if (loader) loader.innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
+              if (loader) loader.innerHTML = `<span style="color:#ff3366">Error: ${error.message}</span>`;
           }
-          historyBox.scrollTop = historyBox.scrollHeight;
+          // Auto-scroll fix
+          historyBox.scrollTop = historyBox.scrollHeight; 
       }
 
       function handleEnter(event) {
           if (event.key === 'Enter') sendMessage();
       }
 
-      // --- PWA INSTALLATION LOGIC ---
+      // --- 3. PWA INSTALLATION ---
       let deferredPrompt;
       const installBtn = document.getElementById('install-btn');
 
-      // 1. Register Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('sw.js')
@@ -94,26 +155,16 @@
         });
       }
 
-      // 2. Catch the Install Prompt from the Browser
       window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent the default browser mini-infobar from appearing
         e.preventDefault();
-        // Stash the event so it can be triggered later.
         deferredPrompt = e;
-        // Show our custom Install Button
-        installBtn.style.display = 'block';
+        installBtn.style.display = 'block'; // Show button when ready
       });
 
-      // 3. What happens when they click our Install Button
       installBtn.addEventListener('click', async () => {
-        // Hide the button
         installBtn.style.display = 'none';
-        // Show the official browser install prompt
         deferredPrompt.prompt();
-        // Wait for the user to respond to the prompt
         const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to the install prompt: ${outcome}`);
-        // Clear the prompt variable
         deferredPrompt = null;
       });
     </script>

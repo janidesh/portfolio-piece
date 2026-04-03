@@ -1,39 +1,35 @@
-const CACHE_NAME = 'janith-gpt-v5';
+const CACHE_NAME = 'janith-gpt-v9';
 
-// Only cache the bare minimum for the app to start
 const ASSETS = [
   '/gpt/',
   '/gpt/index.html',
-  '/gpt/gpt-style.css',
-  '/other images/logo.png'
+  '/gpt/gpt-style.css'
 ];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Forces the new service worker to take over immediately
+  self.skipWaiting(); // Force update instantly
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(clients.claim()); // Become the active worker for all open tabs
+  event.waitUntil(clients.claim());
 });
 
-// FIXED FETCH LOGIC:
 self.addEventListener('fetch', (event) => {
-  // 1. Let API calls (Groq) go straight to the network
+  // Ignore AI API calls
   if (event.request.url.includes('/api/')) return;
 
-  // 2. For page navigation, always try the Network FIRST
-  // This prevents the ERR_FAILED redirect error
+  // Network-First for Navigation to prevent Cloudflare redirect loops
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/gpt/index.html'))
+      fetch(event.request).catch(() => caches.match('/gpt/'))
     );
     return;
   }
 
-  // 3. For images/css, try cache then network
+  // Cache-First for assets like CSS and images
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
