@@ -12,15 +12,16 @@
     --text-main: #e2e2e2;
 }
 
-/* Cleaned up html, body block for cinematic background */
 html, body { 
     margin: 0; padding: 0; 
-    width: 100vw; height: 100vh;
+    width: 100%; /* Changed from 100vw to prevent horizontal pushing */
+    max-width: 100%;
+    height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
     color: var(--text-main); 
-    background-color: transparent; /* Allows cinematic video to show through */
+    background-color: transparent; 
     display: flex; justify-content: center; align-items: center;
-    overflow: hidden; /* Prevents app background from scrolling */
+    overflow: hidden; 
 }
 
 /* --- CINEMATIC VIDEO STYLES --- */
@@ -28,19 +29,19 @@ html, body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     object-fit: cover;
-    z-index: -2; /* Keeps it behind everything */
+    z-index: -2; 
 }
 
 .video-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
-    background: rgba(10, 10, 12, 0.75); /* Darkens the video slightly so your chat is readable */
+    background: rgba(10, 10, 12, 0.75); 
     z-index: -1;
 }
 
@@ -69,7 +70,7 @@ html, body {
 /* --- THE ANDROID SCROLL FIX --- */
 .glass-chat-history {
     flex-grow: 1; 
-    max-height: 65vh; /* Keeps input box visible on all screen sizes */
+    max-height: 65vh; 
     overflow-y: auto; 
     overflow-x: hidden;
     padding: 15px;
@@ -78,10 +79,9 @@ html, body {
     display: flex; flex-direction: column; gap: 12px;
     line-height: 1.5; font-size: 0.95rem;
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* Buttery smooth mobile scrolling */
+    -webkit-overflow-scrolling: touch; 
 }
 
-/* Custom Sleek Scrollbar */
 .glass-chat-history::-webkit-scrollbar { width: 5px; }
 .glass-chat-history::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
 .glass-chat-history::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
@@ -90,11 +90,13 @@ html, body {
 /* --- INPUT AREA --- */
 .chat-input-area { 
     display: flex; gap: 8px; height: 45px; align-items: center; 
-    width: 100%; /* Fixes the Android overflow issue */
+    width: 100%; 
 }
 
 .glass-chat-input {
-    flex-grow: 1; background: rgba(0, 0, 0, 0.6); border: 1px solid var(--glass-border);
+    flex-grow: 1; 
+    min-width: 0; /* THE MAGIC FIX: Forces input to shrink so the Send button fits! */
+    background: rgba(0, 0, 0, 0.6); border: 1px solid var(--glass-border);
     color: #fff; padding: 0 15px; border-radius: 8px; outline: none; font-size: 1rem;
     height: 100%;
 }
@@ -104,19 +106,20 @@ html, body {
     background: var(--primary); color: #fff; border: none;
     border-radius: 8px; padding: 0 20px; font-weight: bold; font-size: 1rem; cursor: pointer;
     transition: 0.3s; height: 100%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; /* Tells the button: DO NOT SHRINK */
 }
 .glass-btn:hover { background: #b033ff; box-shadow: 0 0 15px var(--primary-glow); }
 
 /* --- MOBILE RESPONSIVENESS (Fix for small Android screens) --- */
 @media (max-width: 450px) {
     .app-container {
-        padding: 10px; /* Reduce outer padding to give the chat more room */
+        padding: 8px; /* Tighter against the phone edges */
     }
     .janith-gpt-3d-glass {
-        padding: 10px; /* Shrinks the inner gap */
+        padding: 10px; 
     }
     .glass-btn {
-        padding: 0 12px; /* Makes the buttons slightly narrower */
+        padding: 0 12px; /* Slims down the buttons slightly */
         font-size: 0.9rem;
     }
     .glass-chat-input {
