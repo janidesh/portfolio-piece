@@ -64,7 +64,7 @@ export async function onRequestPost(context) {
 4. DO infer intent. Even if the user's message is messy, answer the actual core problem.`
     };
 
-    // 4. Call Groq API
+ // 4. Call Groq API
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -72,10 +72,10 @@ export async function onRequestPost(context) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        // THIS IS THE CRITICAL FIX: Upgraded to a Vision-capable model
-        model: "llama-3.2-11b-vision-preview",
+        // THIS IS THE NEW FIX: Groq's current Llama 4 Vision model
+        model: "meta-llama/llama-4-scout-17b-16e-instruct", 
         messages: [systemMessage, ...messages],
-        temperature: 0.6 // Kept slightly low so it stays highly accurate to your personality
+        temperature: 0.6
       })
     });
 
