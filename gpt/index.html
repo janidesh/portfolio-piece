@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Janith GPT</title>
-    
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0a0c">
     <link rel="icon" href="../other images/logo.png" type="image/png">
-    
-    <link rel="stylesheet" href="gpt-style.css?v=13">
+    <link rel="stylesheet" href="gpt-style.css?v=14">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -23,29 +22,33 @@
             ⬇️ Install Janith GPT App
         </button>
 
-        ```
-
-
         <div id="janith-gpt-container" class="janith-gpt-3d-glass">
           <div class="chat-header">
             <h3>🤖 Janith GPT</h3>
           </div>
           
+          <div class="tools-row">
+              <button onclick="downloadChatPDF()" class="glass-btn" style="font-size: 0.8rem; height: 30px; background: #333;">📄 Save Chat PDF</button>
+              <button onclick="convertImageToPNG()" class="glass-btn" style="font-size: 0.8rem; height: 30px; background: #333;" id="convert-btn" disabled>🖼️ Convert Image to PNG</button>
+          </div>
+
           <div id="chat-history" class="glass-chat-history">
-            <p><strong>Janith:</strong> I'm Janith. I built this workspace. Drop an image or ask me anything. What's up?</p>
+            <p><strong>Janith:</strong> I'm Janith. I built this workspace. Drop a file, use voice typing, or ask me anything. What's up?</p>
           </div>
           
-          <div id="image-preview-container" style="display: none; margin-bottom: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; text-align: center;">
-              <img id="image-preview" style="max-height: 100px; border-radius: 8px; border: 1px solid #9d00ff;">
-              <span onclick="removeImage()" style="cursor: pointer; color: #ff3366; margin-left: 15px; font-weight: bold; vertical-align: top;">❌ Remove</span>
+          <div id="file-preview-container" style="display: none; margin-bottom: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; text-align: center; flex-shrink: 0;">
+              <img id="image-preview" style="max-height: 80px; border-radius: 8px; border: 1px solid #9d00ff; display: none;">
+              <p id="text-preview" style="color: #00ffcc; font-size: 0.8rem; margin: 5px 0; display: none;">📄 Document Loaded</p>
+              <span onclick="removeFile()" style="cursor: pointer; color: #ff3366; margin-left: 15px; font-weight: bold;">❌ Remove</span>
           </div>
 
           <div class="chat-input-area">
-            <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="previewImage(event)">
+            <input type="file" id="file-input" style="display: none;" onchange="previewFile(event)">
             
-            <button onclick="document.getElementById('file-input').click()" class="glass-btn" style="padding: 0 15px; background: rgba(255,255,255,0.1);">📎</button>
+            <button onclick="document.getElementById('file-input').click()" class="glass-btn" style="padding: 0 10px; background: rgba(255,255,255,0.1);">📎</button>
+            <button id="mic-btn" onclick="toggleMic()" class="glass-btn" style="padding: 0 10px; background: rgba(255,255,255,0.1);">🎙️</button>
             
-            <input type="text" id="chat-input" class="glass-chat-input" placeholder="Message or upload image..." onkeypress="handleEnter(event)">
+            <input type="text" id="chat-input" class="glass-chat-input" placeholder="Message or upload..." onkeypress="handleEnter(event)">
             <button onclick="sendMessage()" class="glass-btn">Send</button>
           </div>
         </div>
@@ -53,64 +56,166 @@
 
     <script>
       let conversationHistory = [];
-      let base64Image = null;
+      let currentFileBase64 = null;
+      let currentFileContent = null;
+      let currentFileType = null;
 
-      // --- 1. IMAGE HANDLING ---
-      function previewImage(event) {
+      // --- 1. FILE & IMAGE HANDLING ---
+      function previewFile(event) {
           const file = event.target.files[0];
           if (!file) return;
 
           const reader = new FileReader();
-          reader.onload = function(e) {
-              base64Image = e.target.result;
-              document.getElementById('image-preview').src = base64Image;
-              document.getElementById('image-preview-container').style.display = 'block';
-          };
-          reader.readAsDataURL(file);
+          
+          if (file.type.startsWith('image/')) {
+              reader.onload = function(e) {
+                  currentFileBase64 = e.target.result;
+                  currentFileType = 'image';
+                  document.getElementById('image-preview').src = currentFileBase64;
+                  document.getElementById('image-preview').style.display = 'inline-block';
+                  document.getElementById('text-preview').style.display = 'none';
+                  document.getElementById('file-preview-container').style.display = 'block';
+                  document.getElementById('convert-btn').disabled = false;
+              };
+              reader.readAsDataURL(file);
+          } else {
+              // Read text-based files (.txt, .json, .csv)
+              reader.onload = function(e) {
+                  currentFileContent = e.target.result;
+                  currentFileType = 'text';
+                  document.getElementById('text-preview').innerText = `📄 ${file.name} loaded`;
+                  document.getElementById('image-preview').style.display = 'none';
+                  document.getElementById('text-preview').style.display = 'inline-block';
+                  document.getElementById('file-preview-container').style.display = 'block';
+                  document.getElementById('convert-btn').disabled = true;
+              };
+              reader.readAsText(file);
+          }
       }
 
-      function removeImage() {
-          base64Image = null;
+      function removeFile() {
+          currentFileBase64 = null;
+          currentFileContent = null;
+          currentFileType = null;
           document.getElementById('file-input').value = '';
-          document.getElementById('image-preview-container').style.display = 'none';
+          document.getElementById('file-preview-container').style.display = 'none';
+          document.getElementById('convert-btn').disabled = true;
       }
 
-      // --- 2. CHAT LOGIC ---
+      // --- 2. AUDIO TYPING (SPEECH TO TEXT) ---
+      let recognition;
+      let isRecording = false;
+
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          recognition = new SpeechRecognition();
+          recognition.continuous = false;
+          recognition.interimResults = false;
+
+          recognition.onresult = function(event) {
+              const text = event.results[0][0].transcript;
+              document.getElementById('chat-input').value += text + ' ';
+              toggleMic(); // Turn off visually
+          };
+
+          recognition.onerror = function(event) {
+              console.error("Speech error", event);
+              toggleMic(); // Turn off visually
+          };
+          
+          recognition.onend = function() {
+              if (isRecording) toggleMic(); // Reset if stopped unexpectedly
+          }
+      } else {
+          console.warn("Speech recognition not supported in this browser.");
+      }
+
+      function toggleMic() {
+          if (!recognition) return alert("Your browser doesn't support Voice Typing.");
+          
+          const micBtn = document.getElementById('mic-btn');
+          if (isRecording) {
+              recognition.stop();
+              micBtn.classList.remove('mic-active');
+          } else {
+              recognition.start();
+              micBtn.classList.add('mic-active');
+          }
+          isRecording = !isRecording;
+      }
+
+      // --- 3. UTILITY: PDF AND IMAGE CONVERSION ---
+      function downloadChatPDF() {
+          const element = document.getElementById('chat-history');
+          const opt = {
+            margin:       0.5,
+            filename:     'Janith-GPT-Chat.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+          };
+          html2pdf().set(opt).from(element).save();
+      }
+
+      function convertImageToPNG() {
+          if (!currentFileBase64 || currentFileType !== 'image') return;
+          
+          const img = new Image();
+          img.src = currentFileBase64;
+          img.onload = function() {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width; canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0);
+              const pngUrl = canvas.toDataURL("image/png");
+              
+              // Trigger download
+              const a = document.createElement('a');
+              a.href = pngUrl;
+              a.download = "converted-image.png";
+              a.click();
+          }
+      }
+
+      // --- 4. CHAT LOGIC ---
       async function sendMessage() {
           const inputField = document.getElementById('chat-input');
           const historyBox = document.getElementById('chat-history');
           const userText = inputField.value.trim();
 
-          // Stop if totally empty
-          if (!userText && !base64Image) return; 
+          if (!userText && !currentFileBase64 && !currentFileContent) return; 
 
           // Build User UI
           let uiMessage = `<p style="text-align: right; color:#e2e2e2;"><strong>You:</strong> ${userText}</p>`;
-          if (base64Image) {
-              uiMessage += `<div style="text-align: right;"><img src="${base64Image}" style="max-height: 150px; border-radius: 8px;"></div>`;
+          if (currentFileType === 'image') {
+              uiMessage += `<div style="text-align: right;"><img src="${currentFileBase64}" style="max-height: 150px; border-radius: 8px;"></div>`;
+          } else if (currentFileType === 'text') {
+              uiMessage += `<p style="text-align: right; color: #00ffcc; font-size: 0.8rem;">[Attached File Content Sent]</p>`;
           }
           historyBox.innerHTML += uiMessage;
 
-          // Format for Vision Model vs Text Model
-          let messageContent = base64Image ? [
-              { type: "text", text: userText || "What is in this image?" },
-              { type: "image_url", image_url: { url: base64Image } }
-          ] : userText;
+          // Format for API
+          let messageContent = userText;
+          if (currentFileType === 'image') {
+              messageContent = [
+                  { type: "text", text: userText || "What is in this image?" },
+                  { type: "image_url", image_url: { url: currentFileBase64 } }
+              ];
+          } else if (currentFileType === 'text') {
+              // Inject the text document into the prompt
+              messageContent = `User attached a document. Document content:\n\n${currentFileContent}\n\nUser Question: ${userText}`;
+          }
 
-          // Save to memory
           conversationHistory.push({ role: "user", content: messageContent });
 
-          // Reset inputs
           inputField.value = '';
-          removeImage();
+          removeFile();
           
-          // Show loading
           const loadingId = 'loading-' + Date.now();
           historyBox.innerHTML += `<p id="${loadingId}" style="color: #9d00ff;"><em>Janith is analyzing...</em></p>`;
           historyBox.scrollTop = historyBox.scrollHeight;
 
           try {
-              // Memory Limit: Only send last 10 messages to prevent crashing Groq
               let messagesToSend = conversationHistory.length > 10 ? conversationHistory.slice(-10) : conversationHistory;
 
               const response = await fetch('/api/chat', {
@@ -124,33 +229,26 @@
 
               const aiText = data.choices[0].message.content;
               document.getElementById(loadingId).remove();
-              
               historyBox.innerHTML += `<p style="color:#00ffcc;"><strong>Janith:</strong> ${aiText.replace(/\n/g, '<br>')}</p>`;
-              
-              // Only save AI text back to memory
               conversationHistory.push({ role: "assistant", content: aiText });
 
           } catch (error) {
-              console.error("ERROR:", error);
               const loader = document.getElementById(loadingId);
               if (loader) loader.innerHTML = `<span style="color:#ff3366">Error: ${error.message}</span>`;
           }
-          // Auto-scroll fix
           historyBox.scrollTop = historyBox.scrollHeight; 
       }
 
-      function handleEnter(event) {
-          if (event.key === 'Enter') sendMessage();
-      }
+      function handleEnter(event) { if (event.key === 'Enter') sendMessage(); }
 
-      // --- 3. PWA INSTALLATION ---
+      // --- 5. PWA LOGIC ---
+      // (Kept identical to your original code)
       let deferredPrompt;
       const installBtn = document.getElementById('install-btn');
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('Service Worker registered!'))
             .catch(err => console.error('Service Worker failed', err));
         });
       }
@@ -158,13 +256,13 @@
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        installBtn.style.display = 'block'; // Show button when ready
+        installBtn.style.display = 'block';
       });
 
       installBtn.addEventListener('click', async () => {
         installBtn.style.display = 'none';
         deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
+        await deferredPrompt.userChoice;
         deferredPrompt = null;
       });
     </script>
