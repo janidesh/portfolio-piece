@@ -16,27 +16,43 @@ html, body {
     margin: 0; padding: 0; 
     width: 100%; 
     max-width: 100%;
-    height: 100vh;
+    min-height: 100vh; /* CHANGED: Allows body to grow beyond the screen */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
     color: var(--text-main); 
     background-color: transparent; 
-    display: flex; justify-content: center; align-items: center;
-    overflow: hidden; 
+    display: flex; justify-content: center; 
+    align-items: flex-start; /* Starts content at the top */
+    overflow-y: auto; /* Enables full-page scrolling */
+    overflow-x: hidden; 
 }
 
+/* --- CINEMATIC VIDEO STYLES --- */
 .space-bg {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-    object-fit: cover; z-index: -2; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -2; 
 }
 
 .video-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-    background: rgba(10, 10, 12, 0.75); z-index: -1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(10, 10, 12, 0.75); 
+    z-index: -1;
 }
 
+/* --- APP CONTAINER --- */
 .app-container {
     width: 100%; height: 100%; max-width: 800px;
-    padding: 15px; display: flex; flex-direction: column;
+    min-height: 100vh; /* Ensures container stretches */
+    padding: 15px; 
+    display: flex; flex-direction: column;
 }
 
 .janith-gpt-3d-glass {
@@ -45,7 +61,6 @@ html, body {
     border: 1px solid var(--glass-border);
     border-radius: 15px; padding: 15px;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 15px var(--primary-glow);
-    overflow: hidden; /* FIX: Prevents children from breaking out */
 }
 
 .chat-header {
@@ -55,28 +70,39 @@ html, body {
 
 .chat-header h3 { margin: 0; font-size: 1.5rem; color: #fff; text-shadow: 0 0 10px var(--primary); }
 
+/* --- THE FULL-PAGE SCROLL FIX --- */
 .glass-chat-history {
     flex-grow: 1; 
-    min-height: 0; /* FIX: Tells flexbox it is allowed to shrink! */
-    overflow-y: auto; overflow-x: hidden;
+    height: auto; /* Lets the box expand dynamically with messages */
+    overflow: visible; /* Disables the inner scrollbar */
     padding: 15px;
     background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 10px;
     border: 1px inset var(--glass-border);
     display: flex; flex-direction: column; gap: 12px;
-    line-height: 1.5; font-size: 0.95rem; scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; 
+    line-height: 1.5; font-size: 0.95rem;
 }
 
-.glass-chat-history::-webkit-scrollbar { width: 5px; }
-.glass-chat-history::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-.glass-chat-history::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+/* Utility Tools row */
+.tools-row {
+    display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; flex-shrink: 0;
+}
 
+/* --- INPUT AREA --- */
 .chat-input-area { 
-    display: flex; gap: 8px; height: 45px; align-items: center; width: 100%; flex-shrink: 0;
+    display: flex; gap: 8px; height: 45px; align-items: center; 
+    width: 100%; 
+    position: sticky; /* Keeps the input bar locked to the bottom while scrolling */
+    bottom: 15px; 
+    background: rgba(20, 20, 25, 0.95); 
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.5); 
+    z-index: 10;
 }
 
 .glass-chat-input {
-    flex-grow: 1; min-width: 0; 
+    flex-grow: 1; 
+    min-width: 0; 
     background: rgba(0, 0, 0, 0.6); border: 1px solid var(--glass-border);
     color: #fff; padding: 0 15px; border-radius: 8px; outline: none; font-size: 1rem;
     height: 100%;
@@ -92,19 +118,17 @@ html, body {
 .glass-btn:hover { background: #b033ff; box-shadow: 0 0 15px var(--primary-glow); }
 .glass-btn.mic-active { background: #ff3366; box-shadow: 0 0 15px #ff3366; animation: pulse 1.5s infinite; }
 
-.tools-row {
-    display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; flex-shrink: 0;
-}
-
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
 
+/* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 450px) {
     .app-container { padding: 8px; }
     .janith-gpt-3d-glass { padding: 10px; }
     .glass-btn { padding: 0 10px; font-size: 0.9rem; }
     .glass-chat-input { padding: 0 10px; }
+    .chat-input-area { bottom: 8px; }
 }

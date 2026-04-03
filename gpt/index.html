@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0a0c">
     <link rel="icon" href="../other images/logo.png" type="image/png">
-    <link rel="stylesheet" href="gpt-style.css?v=14">
+    <link rel="stylesheet" href="gpt-style.css?v=15">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
@@ -114,16 +114,16 @@
           recognition.onresult = function(event) {
               const text = event.results[0][0].transcript;
               document.getElementById('chat-input').value += text + ' ';
-              toggleMic(); // Turn off visually
+              toggleMic();
           };
 
           recognition.onerror = function(event) {
               console.error("Speech error", event);
-              toggleMic(); // Turn off visually
+              toggleMic();
           };
           
           recognition.onend = function() {
-              if (isRecording) toggleMic(); // Reset if stopped unexpectedly
+              if (isRecording) toggleMic();
           }
       } else {
           console.warn("Speech recognition not supported in this browser.");
@@ -175,7 +175,7 @@
           }
       }
 
-      // --- 4. CHAT LOGIC WITH ROLLBACK FIX ---
+      // --- 4. CHAT LOGIC WITH FULL WINDOW AUTO-SCROLL ---
       async function sendMessage() {
           const inputField = document.getElementById('chat-input');
           const historyBox = document.getElementById('chat-history');
@@ -183,7 +183,6 @@
 
           if (!userText && !currentFileBase64 && !currentFileContent) return; 
 
-          // Build User UI
           let uiMessage = `<p style="text-align: right; color:#e2e2e2;"><strong>You:</strong> ${userText}</p>`;
           if (currentFileType === 'image') {
               uiMessage += `<div style="text-align: right;"><img src="${currentFileBase64}" style="max-height: 150px; border-radius: 8px;"></div>`;
@@ -192,7 +191,6 @@
           }
           historyBox.innerHTML += uiMessage;
 
-          // Format for API
           let messageContent = userText;
           if (currentFileType === 'image') {
               messageContent = [
@@ -203,11 +201,9 @@
               messageContent = `User attached a document. Document content:\n\n${currentFileContent}\n\nUser Question: ${userText}`;
           }
 
-          // Save the history length BEFORE pushing, so we can roll back if it fails
           const historyLengthBefore = conversationHistory.length;
           conversationHistory.push({ role: "user", content: messageContent });
 
-          // Reset inputs
           const wasImage = (currentFileType === 'image');
           const savedUserText = userText;
           inputField.value = '';
@@ -215,7 +211,9 @@
           
           const loadingId = 'loading-' + Date.now();
           historyBox.innerHTML += `<p id="${loadingId}" style="color: #9d00ff;"><em>Janith is analyzing...</em></p>`;
-          historyBox.scrollTop = historyBox.scrollHeight;
+          
+          // Auto-scroll entire window
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
           try {
               let messagesToSend = conversationHistory.length > 10 ? conversationHistory.slice(-10) : conversationHistory;
@@ -233,7 +231,6 @@
               document.getElementById(loadingId).remove();
               historyBox.innerHTML += `<p style="color:#00ffcc;"><strong>Janith:</strong> ${aiText.replace(/\n/g, '<br>')}</p>`;
               
-              // CLEANUP: Prevent massive base64 strings from crashing future turns
               if (wasImage) {
                   conversationHistory[conversationHistory.length - 1].content = `[User uploaded an image]: ${savedUserText || "No text provided"}`;
               }
@@ -241,12 +238,13 @@
               conversationHistory.push({ role: "assistant", content: aiText });
 
           } catch (error) {
-              // ROLLBACK: Remove bad message so chat doesn't permanently break
               conversationHistory = conversationHistory.slice(0, historyLengthBefore);
               const loader = document.getElementById(loadingId);
               if (loader) loader.innerHTML = `<span style="color:#ff3366">Error: ${error.message}</span>`;
           }
-          historyBox.scrollTop = historyBox.scrollHeight; 
+          
+          // Auto-scroll entire window
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); 
       }
 
       function handleEnter(event) { if (event.key === 'Enter') sendMessage(); }
