@@ -1,3 +1,8 @@
+/* CRITICAL FIX: Forces padding to stay INSIDE the 100% width on Android */
+* { 
+    box-sizing: border-box; 
+}
+
 :root {
     --primary: #9d00ff;
     --primary-glow: rgba(157, 0, 255, 0.4);
@@ -7,19 +12,18 @@
     --text-main: #e2e2e2;
 }
 
-html, body { 
-    /* Update your html, body to make the background transparent */
+/* Cleaned up html, body block for cinematic background */
 html, body { 
     margin: 0; padding: 0; 
     width: 100vw; height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
     color: var(--text-main); 
-    background-color: transparent; /* Changed from var(--bg-dark) so video shows */
+    background-color: transparent; /* Allows cinematic video to show through */
     display: flex; justify-content: center; align-items: center;
-    overflow: hidden; 
+    overflow: hidden; /* Prevents app background from scrolling */
 }
 
-/* --- ADD THESE NEW CINEMATIC VIDEO STYLES --- */
+/* --- CINEMATIC VIDEO STYLES --- */
 .space-bg {
     position: fixed;
     top: 0;
@@ -39,18 +43,11 @@ html, body {
     background: rgba(10, 10, 12, 0.75); /* Darkens the video slightly so your chat is readable */
     z-index: -1;
 }
-    margin: 0; padding: 0; 
-    width: 100vw; height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-    color: var(--text-main); 
-    background-color: var(--bg-dark); 
-    display: flex; justify-content: center; align-items: center;
-    overflow: hidden; /* Prevents app background from scrolling */
-}
 
+/* --- APP CONTAINER --- */
 .app-container {
     width: 100%; height: 100%; max-width: 800px;
-    padding: 15px; box-sizing: border-box;
+    padding: 15px; 
     display: flex; flex-direction: column;
 }
 
@@ -72,7 +69,7 @@ html, body {
 /* --- THE ANDROID SCROLL FIX --- */
 .glass-chat-history {
     flex-grow: 1; 
-    max-height: 65vh; /* Magic number to keep input box visible */
+    max-height: 65vh; /* Keeps input box visible on all screen sizes */
     overflow-y: auto; 
     overflow-x: hidden;
     padding: 15px;
@@ -90,14 +87,16 @@ html, body {
 .glass-chat-history::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 .glass-chat-history::-webkit-scrollbar-thumb:hover { background: #b533ff; }
 
+/* --- INPUT AREA --- */
 .chat-input-area { 
     display: flex; gap: 8px; height: 45px; align-items: center; 
+    width: 100%; /* Fixes the Android overflow issue */
 }
 
 .glass-chat-input {
     flex-grow: 1; background: rgba(0, 0, 0, 0.6); border: 1px solid var(--glass-border);
     color: #fff; padding: 0 15px; border-radius: 8px; outline: none; font-size: 1rem;
-    height: 100%; box-sizing: border-box;
+    height: 100%;
 }
 .glass-chat-input:focus { border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
 
@@ -107,3 +106,20 @@ html, body {
     transition: 0.3s; height: 100%; display: flex; align-items: center; justify-content: center;
 }
 .glass-btn:hover { background: #b033ff; box-shadow: 0 0 15px var(--primary-glow); }
+
+/* --- MOBILE RESPONSIVENESS (Fix for small Android screens) --- */
+@media (max-width: 450px) {
+    .app-container {
+        padding: 10px; /* Reduce outer padding to give the chat more room */
+    }
+    .janith-gpt-3d-glass {
+        padding: 10px; /* Shrinks the inner gap */
+    }
+    .glass-btn {
+        padding: 0 12px; /* Makes the buttons slightly narrower */
+        font-size: 0.9rem;
+    }
+    .glass-chat-input {
+        padding: 0 10px;
+    }
+}

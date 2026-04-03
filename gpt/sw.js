@@ -1,4 +1,4 @@
-const CACHE_NAME = 'janith-gpt-v10';
+const CACHE_NAME = 'janith-gpt-v12';
 
 const ASSETS = [
   '/gpt/',
