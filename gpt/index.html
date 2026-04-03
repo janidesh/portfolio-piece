@@ -79,7 +79,6 @@
               };
               reader.readAsDataURL(file);
           } else {
-              // Read text-based files (.txt, .json, .csv)
               reader.onload = function(e) {
                   currentFileContent = e.target.result;
                   currentFileType = 'text';
@@ -169,7 +168,6 @@
               ctx.drawImage(img, 0, 0);
               const pngUrl = canvas.toDataURL("image/png");
               
-              // Trigger download
               const a = document.createElement('a');
               a.href = pngUrl;
               a.download = "converted-image.png";
@@ -177,7 +175,7 @@
           }
       }
 
-      // --- 4. CHAT LOGIC ---
+      // --- 4. CHAT LOGIC WITH ROLLBACK FIX ---
       async function sendMessage() {
           const inputField = document.getElementById('chat-input');
           const historyBox = document.getElementById('chat-history');
@@ -202,12 +200,16 @@
                   { type: "image_url", image_url: { url: currentFileBase64 } }
               ];
           } else if (currentFileType === 'text') {
-              // Inject the text document into the prompt
               messageContent = `User attached a document. Document content:\n\n${currentFileContent}\n\nUser Question: ${userText}`;
           }
 
+          // Save the history length BEFORE pushing, so we can roll back if it fails
+          const historyLengthBefore = conversationHistory.length;
           conversationHistory.push({ role: "user", content: messageContent });
 
+          // Reset inputs
+          const wasImage = (currentFileType === 'image');
+          const savedUserText = userText;
           inputField.value = '';
           removeFile();
           
@@ -225,14 +227,22 @@
               });
 
               const data = await response.json();
-              if (data.error) throw new Error(data.error);
+              if (data.error) throw new Error(data.error.message || data.error);
 
               const aiText = data.choices[0].message.content;
               document.getElementById(loadingId).remove();
               historyBox.innerHTML += `<p style="color:#00ffcc;"><strong>Janith:</strong> ${aiText.replace(/\n/g, '<br>')}</p>`;
+              
+              // CLEANUP: Prevent massive base64 strings from crashing future turns
+              if (wasImage) {
+                  conversationHistory[conversationHistory.length - 1].content = `[User uploaded an image]: ${savedUserText || "No text provided"}`;
+              }
+
               conversationHistory.push({ role: "assistant", content: aiText });
 
           } catch (error) {
+              // ROLLBACK: Remove bad message so chat doesn't permanently break
+              conversationHistory = conversationHistory.slice(0, historyLengthBefore);
               const loader = document.getElementById(loadingId);
               if (loader) loader.innerHTML = `<span style="color:#ff3366">Error: ${error.message}</span>`;
           }
@@ -242,7 +252,6 @@
       function handleEnter(event) { if (event.key === 'Enter') sendMessage(); }
 
       // --- 5. PWA LOGIC ---
-      // (Kept identical to your original code)
       let deferredPrompt;
       const installBtn = document.getElementById('install-btn');
 

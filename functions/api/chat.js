@@ -72,7 +72,8 @@ export async function onRequestPost(context) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        // THIS IS THE CRITICAL FIX: Upgraded to a Vision-capable model
+        model: "llama-3.2-11b-vision-preview",
         messages: [systemMessage, ...messages],
         temperature: 0.6 // Kept slightly low so it stays highly accurate to your personality
       })
